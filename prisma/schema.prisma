@@ -1,0 +1,86 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = "postgresql://postgres:Nandalinda%401@localhost:5432/barbeTime?schema=public"
+}
+
+// usuarios (clientes e barbeiros)
+model Usuario {
+  id        String   @id @default(uuid())
+  nome      String
+  email     String   @unique
+  telefone  String
+  senha     String   // hash com bcrypt
+  tipo      TipoUsuario @default(CLIENTE)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+  
+  // se for cliente: agendamentos que ele fez
+  // se for barbeiro: agendamentos que ele vai atender + serviços que oferece
+  agendamentosComoCliente Agendamento[] @relation("ClienteAgendamentos")
+  agendamentosComoBarbeiro Agendamento[] @relation("BarbeiroAgendamentos")
+  servicosOferecidos Servico[]
+  
+  @@map("usuarios")
+  @@index([email])
+}
+
+// servicos oferecidos
+model Servico {
+  id        String   @id @default(uuid())
+  nome      String   // ex: "Corte Masculino", "Barba"
+  descricao String?
+  preco     Float
+  duracao   Int      // minutos
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+  
+  // qual barbeiro oferece esse serviço
+  barbeiroId String
+  barbeiro   Usuario @relation(fields: [barbeiroId], references: [id])
+  
+  agendamentos Agendamento[]
+  
+  @@map("servicos")
+}
+
+model Agendamento {
+  id         String   @id @default(uuid())
+  dataHora   DateTime
+  status     StatusAgendamento @default(PENDENTE)
+  observacao String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  deletedAt  DateTime?
+  
+  // quem agendou (cliente)
+  clienteId  String
+  cliente    Usuario  @relation("ClienteAgendamentos", fields: [clienteId], references: [id])
+  
+  // quem vai atender (barbeiro)
+  barbeiroId String
+  barbeiro   Usuario  @relation("BarbeiroAgendamentos", fields: [barbeiroId], references: [id])
+  
+  // qual serviço foi agendado
+  servicoId  String
+  servico    Servico  @relation(fields: [servicoId], references: [id])
+  
+  @@map("agendamentos")
+}
+
+enum TipoUsuario {
+  BARBEIRO
+  CLIENTE
+}
+
+enum StatusAgendamento {
+  PENDENTE
+  CONFIRMADO
+  CANCELADO
+  CONCLUIDO
+}
