@@ -3,8 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = "postgresql://postgres:Nandalinda%401@localhost:5432/barbeTime?schema=public"
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
 }
 
 // usuarios (clientes e barbeiros)
@@ -14,7 +14,7 @@ model Usuario {
   email     String   @unique
   telefone  String
   senha     String   // hash com bcrypt
-  tipo      TipoUsuario @default(CLIENTE)
+  tipo      String   @default("CLIENTE") // BARBEIRO ou CLIENTE
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   deletedAt DateTime?
@@ -52,7 +52,7 @@ model Servico {
 model Agendamento {
   id         String   @id @default(uuid())
   dataHora   DateTime
-  status     StatusAgendamento @default(PENDENTE)
+  status     String   @default("PENDENTE") // PENDENTE, CONFIRMADO, CANCELADO, CONCLUIDO
   observacao String?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
@@ -73,14 +73,5 @@ model Agendamento {
   @@map("agendamentos")
 }
 
-enum TipoUsuario {
-  BARBEIRO
-  CLIENTE
-}
-
-enum StatusAgendamento {
-  PENDENTE
-  CONFIRMADO
-  CANCELADO
-  CONCLUIDO
-}
+// Valores válidos para tipo de usuário: "BARBEIRO", "CLIENTE"
+// Valores válidos para status: "PENDENTE", "CONFIRMADO", "CANCELADO", "CONCLUIDO"
