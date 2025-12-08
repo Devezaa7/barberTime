@@ -23,10 +23,20 @@ export const criarServicoValidation = z.object({
     })
     .positive("O preço deve ser maior que zero"),
 
-    duracao: z.
-    number({required_error: "A duração é obrigatória",
-      invalid_type_error: "A duração deve ser um número",
+    duracao: z
+    .number({
+        required_error: "A duração é obrigatória",
+        invalid_type_error: "A duração deve ser um número",
     })
-    .init("A duração deve ser um número inteiro")
-    .positive("A duração deve ser um número maior que zero")
-})
+    .int("A duração deve ser um número inteiro")
+    .positive("A duração deve ser um número maior que zero"),
+    
+    barbeiroId: z
+    .string({
+        required_error: "O ID do barbeiro é obrigatório",
+        invalid_type_error: "O ID do barbeiro deve ser uma string",
+    })
+    .uuid("O ID do barbeiro deve ser um UUID válido")
+});
+
+export default criarServicoValidation;

@@ -1,21 +1,21 @@
 import { Router } from "express";
-import ServicoController from "src/controllers/servicoController.js";
+import ServicoController from "../controllers/servicoController.js";  
 
 const router = Router();
 
 // Listar todos
-router.get("/servicos", ServicoController.listar);
+router.get("/", ServicoController.listar);  
 
 // Buscar por ID
-router.get("/servicos/:id", ServicoController.buscarPorId);
+router.get("/:id", ServicoController.buscarPorId);
 
 // Criar serviço
-router.post("/servicos", ServicoController.criar);
+router.post("/", ServicoController.criar);
 
 // Atualizar serviço
-router.put("/servicos/:id", ServicoController.atualizar);
+router.put("/:id", ServicoController.atualizar);
 
 // Deletar serviço
-router.delete("/servicos/:id", ServicoController.deletar);
+router.delete("/:id", ServicoController.deletar);
 
-export default router;
+export default router;

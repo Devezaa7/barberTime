@@ -25,7 +25,7 @@ const ServicoController = {
   buscarPorId: async (req, res) => {
     try {
       const { id } = req.params;
-      const servico = await ServicoService.buscarPorId(Number(id));
+      const servico = await ServicoService.buscarPorId(id);
 
       if (!servico) {
         return res.status(404).json({ error: "Serviço não encontrado" });
@@ -40,10 +40,8 @@ const ServicoController = {
   atualizar: async (req, res) => {
     try {
       const { id } = req.params;
-
       const dados = criarServicoValidation.parse(req.body);
-
-      const servicoAtualizado = await ServicoService.atualizar(Number(id), dados);
+      const servicoAtualizado = await ServicoService.atualizar(id, dados);  // ✅ CORRIGIDO: id é string
 
       return res.status(200).json(servicoAtualizado);
     } catch (error) {
@@ -54,8 +52,7 @@ const ServicoController = {
   deletar: async (req, res) => {
     try {
       const { id } = req.params;
-
-      await ServicoService.deletar(Number(id));
+      await ServicoService.deletar(id); 
 
       return res.status(200).json({ message: "Serviço deletado com sucesso" });
     } catch (error) {
