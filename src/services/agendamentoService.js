@@ -1,18 +1,30 @@
+import { success } from 'zod';
 import prisma from '../prisma/client.js';
+import { ServicoService } from './servicoService.js'
 // exportando as funções do serviço de agendamento
 export const agendamentoService = {
-    async create(data, clienteId) {
-        //verificando se já existe um agendamento no mesmo horário
-        const conflito = await prisma.agendamento.findFirst({
-            where: {
-                barbeiroId: data.barbeiroId,
-                dataHora: new Date(data.dataHora),
-                deletedAt: null,
-            },
-        });
+    // agendamentoService.js - Função create
+async create(data, clienteId) {
+    
+    const servico = await ServicoService.buscarPorId(data.servicoId);
+    
+    //Verificação de existência de serviço
+    if (!servico || servico.deletedAt) {
+        throw new Error('Serviço não encontrado ou indisponível.');
+    }
 
+    //  Verifica se barbeiro informado é o mesmo que oferece o serviço
+    if (servico.barbeiroId !== data.barbeiroId) {
+        throw new Error('O barbeiro informado não oferece esse serviço.');
+    }
+    
+    // de conflito de agendamento 
+    const inicio = new Date(data.dataHora);
+    // REMOVA A LINHA REDUNDANTE: const servicoDuracao = await ServicoService.buscarPorId(data.servicoId);
+    const fim = new Date(inicio.getTime() + servico.duracao * 60000); // Usa 'servico.duracao'
+    
         if (conflito) {
-            throw new Error('Já existe um agendamento para este barbeiro neste horário.');
+            throw new Error('Já existe um agendamento para este barbeiro neste horário ou há conflito de duração com outro agendamento feito com esse barbeiro');
         }
 
 
@@ -30,18 +42,37 @@ export const agendamentoService = {
     },
 
 // buscando todos os agendamentos
-    async findAll(user) {
+
+    async findAll(user, page = 1, perPage = 10) {
         const filtros = 
             user.tipo === "BARBEIRO"
             ? { barbeiroId: user.id}
             : { clienteId: user.id};
-            // se for barbeiro, filtra pelo barbeiroId, se for cliente, filtra pelo clienteId
 
-            return prisma.agendamento.findMany({
-                where: { ...filtros, deletedAt: null},
-                include: { servico: true, barbeiro: true, cliente: true},
-                orderBy: { dataHora: "asc"},
-            });
+        const skip = (page - 1) * perPage
+
+        const [agendamentos, total] = await Promise.all([
+            prisma.agendamento.findMany({
+                where: { ...filtros, deletedAt: null },
+                include: { servico: true, barbeiro: true, cliente: true },
+                orderBy: { dataHora: "asc" },
+                skip,
+                take: perPage,
+                }),
+        prisma.agendamento.count({ where: { ...filtros, deletedAt: null } }),
+  ]);
+        return {
+            success: true,
+            message: "Lista de agendamentos retornada com sucesso",
+            pagination: {
+                page,
+                perPage,
+                total,
+
+            },
+            
+            data: agendamentos,
+        };    
         
     },
 // buscando agendamento por ID
