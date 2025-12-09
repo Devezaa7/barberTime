@@ -1,4 +1,5 @@
 import prisma from "../prisma/client.js";
+import ServicoRepository from "../repositories/servicoRepository.js";
 
 export const ServicoService = {
   // Criar um novo serviço
@@ -18,6 +19,7 @@ export const ServicoService = {
         barbeiroId: dados.barbeiroId, // vínculo com o barbeiro
       },
     });
+    return ServicoRepository.criar(dados);
   },
 
   // Listar serviços com paginação
@@ -38,16 +40,25 @@ export const ServicoService = {
       page,
       perPage,
       total,
-      data: servicos,
+      totalPages: Math.ceil(total / perPage),
+      data: servicos
     };
   },
 
   // Buscar serviço por ID
   buscarPorId: async (id) => {
-    return prisma.servico.findUnique({
-      where: { id },
-      include: { barbeiro: true },
-    });
+    const servico = await ServicoRepository.buscarPorId(id);
+    
+    if (!servico) {
+      throw new Error("Serviço não encontrado");
+    }
+    
+    return servico;
+  },
+
+  atualizar: async (id, dados) => {
+    await this.buscarPorId(id);
+    return ServicoRepository.atualizar(id, dados);
   },
 
   // Atualizar serviço

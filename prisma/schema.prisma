@@ -71,16 +71,95 @@ model Agendamento {
   servico    Servico  @relation(fields: [servicoId], references: [id])
   
   @@map("agendamentos")
+  directUrl = env("DIRECT_URL") // necessário para migrations no Neon
 }
 
+// Enum para tipos de usuário (melhor prática que strings soltas)
 enum TipoUsuario {
-  BARBEIRO
   CLIENTE
+  BARBEIRO
+  ADMIN
 }
 
+// Enum para status do agendamento
 enum StatusAgendamento {
   PENDENTE
   CONFIRMADO
   CANCELADO
   CONCLUIDO
+}
+
+// Usuários (clientes e barbeiros)
+model Usuario {
+  id        String        @id @default(uuid())
+  nome      String
+  email     String        @unique
+  telefone  String
+  senha     String        // hash com bcrypt
+  tipo      TipoUsuario   @default(CLIENTE)
+  ativo     Boolean       @default(true) // facilita soft delete
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  deletedAt DateTime?
+  
+  // Relacionamentos
+  agendamentosComoCliente  Agendamento[] @relation("ClienteAgendamentos")
+  agendamentosComoBarbeiro Agendamento[] @relation("BarbeiroAgendamentos")
+  servicosOferecidos       Servico[]
+  
+  @@map("usuarios")
+  @@index([email])
+  @@index([tipo])
+  @@index([deletedAt]) // importante para queries com soft delete
+}
+
+// Serviços oferecidos
+model Servico {
+  id          String    @id @default(uuid())
+  nome        String
+  descricao   String?
+  preco       Decimal   @db.Decimal(10, 2) // melhor que Float para dinheiro
+  duracao     Int       // minutos
+  ativo       Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  
+  // Relacionamentos
+  barbeiroId  String
+  barbeiro    Usuario      @relation(fields: [barbeiroId], references: [id], onDelete: Cascade)
+  agendamentos Agendamento[]
+  
+  @@map("servicos")
+  @@index([barbeiroId])
+  @@index([deletedAt])
+}
+
+// Agendamentos
+model Agendamento {
+  id          String             @id @default(uuid())
+  dataHora    DateTime
+  status      StatusAgendamento  @default(PENDENTE)
+  observacao  String?
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  deletedAt   DateTime?
+  
+  // Relacionamentos
+  clienteId   String
+  cliente     Usuario   @relation("ClienteAgendamentos", fields: [clienteId], references: [id], onDelete: Cascade)
+  
+  barbeiroId  String
+  barbeiro    Usuario   @relation("BarbeiroAgendamentos", fields: [barbeiroId], references: [id], onDelete: Cascade)
+  
+  servicoId   String
+  servico     Servico   @relation(fields: [servicoId], references: [id], onDelete: Cascade)
+  
+  @@map("agendamentos")
+  @@index([clienteId])
+  @@index([barbeiroId])
+  @@index([servicoId])
+  @@index([dataHora])
+  @@index([status])
+  @@index([deletedAt])
 }

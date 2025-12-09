@@ -29,7 +29,7 @@ const ServicoController = {
   buscarPorId: async (req, res) => {
     try {
       const { id } = req.params;
-      const servico = await ServicoService.buscarPorId(id); // ✅ UUID é string, não número
+      const servico = await ServicoService.buscarPorId(id); 
 
       if (!servico) {
         return res.status(404).json({ error: "Serviço não encontrado" });
@@ -57,7 +57,6 @@ const ServicoController = {
   deletar: async (req, res) => {
     try {
       const { id } = req.params;
-
       await ServicoService.deletar(id); 
 
       return res.status(200).json({ message: "Serviço deletado com sucesso" });
