@@ -5,73 +5,95 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL") // necessário para migrations no Neon
 }
 
-// usuarios (clientes e barbeiros)
+// Enum para tipos de usuário (melhor prática que strings soltas)
+enum TipoUsuario {
+  CLIENTE
+  BARBEIRO
+  ADMIN
+}
+
+// Enum para status do agendamento
+enum StatusAgendamento {
+  PENDENTE
+  CONFIRMADO
+  CANCELADO
+  CONCLUIDO
+}
+
+// Usuários (clientes e barbeiros)
 model Usuario {
-  id        String   @id @default(uuid())
+  id        String        @id @default(uuid())
   nome      String
-  email     String   @unique
+  email     String        @unique
   telefone  String
-  senha     String   // hash com bcrypt
-  tipo      String   @default("CLIENTE") // BARBEIRO ou CLIENTE
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  senha     String        // hash com bcrypt
+  tipo      TipoUsuario   @default(CLIENTE)
+  ativo     Boolean       @default(true) // facilita soft delete
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
   deletedAt DateTime?
   
-  // se for cliente: agendamentos que ele fez
-  // se for barbeiro: agendamentos que ele vai atender + serviços que oferece
-  agendamentosComoCliente Agendamento[] @relation("ClienteAgendamentos")
+  // Relacionamentos
+  agendamentosComoCliente  Agendamento[] @relation("ClienteAgendamentos")
   agendamentosComoBarbeiro Agendamento[] @relation("BarbeiroAgendamentos")
-  servicosOferecidos Servico[]
+  servicosOferecidos       Servico[]
   
   @@map("usuarios")
   @@index([email])
+  @@index([tipo])
+  @@index([deletedAt]) // importante para queries com soft delete
 }
 
-// servicos oferecidos
+// Serviços oferecidos
 model Servico {
-  id        String   @id @default(uuid())
-  nome      String   // ex: "Corte Masculino", "Barba"
-  descricao String?
-  preco     Float
-  duracao   Int      // minutos
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  deletedAt DateTime?
+  id          String    @id @default(uuid())
+  nome        String
+  descricao   String?
+  preco       Decimal   @db.Decimal(10, 2) // melhor que Float para dinheiro
+  duracao     Int       // minutos
+  ativo       Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
   
-  // qual barbeiro oferece esse serviço
-  barbeiroId String
-  barbeiro   Usuario @relation(fields: [barbeiroId], references: [id])
-  
+  // Relacionamentos
+  barbeiroId  String
+  barbeiro    Usuario      @relation(fields: [barbeiroId], references: [id], onDelete: Cascade)
   agendamentos Agendamento[]
   
   @@map("servicos")
+  @@index([barbeiroId])
+  @@index([deletedAt])
 }
 
+// Agendamentos
 model Agendamento {
-  id         String   @id @default(uuid())
-  dataHora   DateTime
-  status     String   @default("PENDENTE") // PENDENTE, CONFIRMADO, CANCELADO, CONCLUIDO
-  observacao String?
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  deletedAt  DateTime?
+  id          String             @id @default(uuid())
+  dataHora    DateTime
+  status      StatusAgendamento  @default(PENDENTE)
+  observacao  String?
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  deletedAt   DateTime?
   
-  // quem agendou (cliente)
-  clienteId  String
-  cliente    Usuario  @relation("ClienteAgendamentos", fields: [clienteId], references: [id])
+  // Relacionamentos
+  clienteId   String
+  cliente     Usuario   @relation("ClienteAgendamentos", fields: [clienteId], references: [id], onDelete: Cascade)
   
-  // quem vai atender (barbeiro)
-  barbeiroId String
-  barbeiro   Usuario  @relation("BarbeiroAgendamentos", fields: [barbeiroId], references: [id])
+  barbeiroId  String
+  barbeiro    Usuario   @relation("BarbeiroAgendamentos", fields: [barbeiroId], references: [id], onDelete: Cascade)
   
-  // qual serviço foi agendado
-  servicoId  String
-  servico    Servico  @relation(fields: [servicoId], references: [id])
+  servicoId   String
+  servico     Servico   @relation(fields: [servicoId], references: [id], onDelete: Cascade)
   
   @@map("agendamentos")
+  @@index([clienteId])
+  @@index([barbeiroId])
+  @@index([servicoId])
+  @@index([dataHora])
+  @@index([status])
+  @@index([deletedAt])
 }
-
-// Valores válidos para tipo de usuário: "BARBEIRO", "CLIENTE"
-// Valores válidos para status: "PENDENTE", "CONFIRMADO", "CANCELADO", "CONCLUIDO"
