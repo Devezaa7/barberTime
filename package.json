@@ -31,8 +31,8 @@
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
-    "prisma": "^5.7.0",
-    "zod": "^3.22.4"
+    "prisma": "5.7.0",
+    "zod": "^4.1.13"
   },
   "devDependencies": {
     "dotenv-cli": "^11.0.0",

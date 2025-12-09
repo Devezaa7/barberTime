@@ -1,9 +1,9 @@
-import { Router } from 'express';
-const router = Router();
+import express from "express";
+const router = express.Router();
 
-// exemplo de rota
-router.get('/', (req, res) => {
-  res.send('Rota de usuários funcionando!');
+// rota de teste temporária
+router.get("/", (req, res) => {
+  res.json({ message: "Rota de usuários funcionando!" });
 });
 
 export default router;

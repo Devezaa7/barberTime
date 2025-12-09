@@ -1,10 +1,10 @@
 import { Router } from "express";
-import ServicoController from "../controllers/servicoController.js";  
+import ServicoController from "../controllers/servicoController.js";
 
 const router = Router();
 
 // Listar todos
-router.get("/", ServicoController.listar);  
+router.get("/", ServicoController.listar);
 
 // Buscar por ID
 router.get("/:id", ServicoController.buscarPorId);

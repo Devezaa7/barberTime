@@ -1,9 +1,13 @@
-import ServicoService from "../services/servicoService.js";
-import criarServicoValidation from "../validations/servicoValidation.js";
+import { ServicoService } from "../services/servicoService.js";
+import {
+  criarServicoValidation,
+  atualizarServicoValidation,
+} from "../validations/servicoValidation.js";
 
 const ServicoController = {
   criar: async (req, res) => {
     try {
+      console.log("corpo recebido no controller:", req.body);
       const dados = criarServicoValidation.parse(req.body);
       const novoServico = await ServicoService.criar(dados);
       return res.status(201).json(novoServico);
@@ -25,7 +29,7 @@ const ServicoController = {
   buscarPorId: async (req, res) => {
     try {
       const { id } = req.params;
-      const servico = await ServicoService.buscarPorId(id);
+      const servico = await ServicoService.buscarPorId(id); 
 
       if (!servico) {
         return res.status(404).json({ error: "Serviço não encontrado" });
@@ -40,8 +44,9 @@ const ServicoController = {
   atualizar: async (req, res) => {
     try {
       const { id } = req.params;
-      const dados = criarServicoValidation.parse(req.body);
-      const servicoAtualizado = await ServicoService.atualizar(id, dados);  // ✅ CORRIGIDO: id é string
+      const dados = atualizarServicoValidation.parse(req.body);
+
+      const servicoAtualizado = await ServicoService.atualizar(id, dados); 
 
       return res.status(200).json(servicoAtualizado);
     } catch (error) {
@@ -58,7 +63,7 @@ const ServicoController = {
     } catch (error) {
       return res.status(400).json({ error: error.message });
     }
-  }
+  },
 };
 
 export default ServicoController;

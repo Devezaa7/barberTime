@@ -30,13 +30,15 @@ export const criarServicoValidation = z.object({
     })
     .int("A duração deve ser um número inteiro")
     .positive("A duração deve ser um número maior que zero"),
-    
+
     barbeiroId: z
     .string({
-        required_error: "O ID do barbeiro é obrigatório",
-        invalid_type_error: "O ID do barbeiro deve ser uma string",
+      required_error: "O barbeiroId é obrigatório",
+      invalid_type_error: "O barbeiroId deve ser uma string UUID",
     })
-    .uuid("O ID do barbeiro deve ser um UUID válido")
-});
+    .uuid("O barbeiroId deve ser um UUID válido"), 
 
-export default criarServicoValidation;
+    
+});
+// atualizar serviço com campos opcionais
+    export const atualizarServicoValidation = criarServicoValidation.partial()
