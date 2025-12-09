@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -14,7 +14,7 @@ model Usuario {
   email     String   @unique
   telefone  String
   senha     String   // hash com bcrypt
-  tipo      String   @default("CLIENTE") // "BARBEIRO" ou "CLIENTE"
+  tipo      String   @default("CLIENTE") // BARBEIRO ou CLIENTE
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   deletedAt DateTime?
@@ -52,7 +52,7 @@ model Servico {
 model Agendamento {
   id         String   @id @default(uuid())
   dataHora   DateTime
-  status     String   @default("PENDENTE") // "PENDENTE", "CONFIRMADO", "CANCELADO", "CONCLUIDO"
+  status     String   @default("PENDENTE") // PENDENTE, CONFIRMADO, CANCELADO, CONCLUIDO
   observacao String?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
@@ -72,3 +72,6 @@ model Agendamento {
   
   @@map("agendamentos")
 }
+
+// Valores válidos para tipo de usuário: "BARBEIRO", "CLIENTE"
+// Valores válidos para status: "PENDENTE", "CONFIRMADO", "CANCELADO", "CONCLUIDO"
