@@ -1,18 +1,21 @@
-import { Router } from "express";
-import usuarioRoutes from "./usuarioRoutes.js";
-import servicoRoutes from "./servicoRoutes.js";
-import agendamentoRoutes from "./agendamentoRoutes.js";
+import { Router } from 'express';
+import usuarioRoutes from './usuarioRoutes.js';
+import servicoRoutes from './servicoRoutes.js';
+import agendamentoRoutes from './agendamentoRoutes.js';
+import authRoutes from './authRoutes.js'; // ← ADICIONADO AQUI
 
 const router = Router();
 
-// Rota de status — serve pra testar se a API está online
-router.get("/status", (req, res) => {
-  res.json({ status: "ok" });
+router.get('/status', (req, res) => {
+  res.json({ status: 'ok' });
 });
 
-//Rotas principais
-router.use("/usuarios", usuarioRoutes);
-router.use("/servicos", servicoRoutes);
-router.use("/agendamentos", agendamentoRoutes);
+// Rotas de autenticação
+router.use('/auth', authRoutes); // ← ADICIONADO AQUI
 
-export default router;
+// Rotas de recursos
+router.use('/usuarios', usuarioRoutes);
+router.use('/servicos', servicoRoutes);
+router.use('/agendamentos', agendamentoRoutes);
+
+export default router; 
