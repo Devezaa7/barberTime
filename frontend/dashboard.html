@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — BarberTime</title>
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  
+  <!-- SIDEBAR LATERAL -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="logo-sidebar">
+        <i class="fas fa-cut"></i>
+      </div>
+      <h2>BARBERTIME</h2>
+      <p class="subtitle">Excelência em cada corte</p>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="#" class="nav-item active" data-section="appointments">
+        <i class="fas fa-calendar-check"></i>
+        <span>Meus Agendamentos</span>
+      </a>
+      <a href="#" class="nav-item" data-section="new-appointment">
+        <i class="fas fa-plus-circle"></i>
+        <span>Novo Agendamento</span>
+      </a>
+      <a href="#" class="nav-item" data-section="barbers">
+        <i class="fas fa-users"></i>
+        <span>Nossos Barbeiros</span>
+      </a>
+      <a href="#" class="nav-item" data-section="about">
+        <i class="fas fa-info-circle"></i>
+        <span>Sobre Nós</span>
+      </a>
+      <a href="#" class="nav-item" data-section="contact">
+        <i class="fas fa-phone"></i>
+        <span>Contato</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <i class="fas fa-user-circle"></i>
+        <div>
+          <p class="user-name" id="user-name">Usuário</p>
+          <p class="user-email" id="user-email">email@exemplo.com</p>
+        </div>
+      </div>
+      <button class="logout-btn" onclick="logout()">
+        <i class="fas fa-sign-out-alt"></i>
+        Sair
+      </button>
+    </div>
+  </aside>
+
+  <!-- BOTÃO MENU MOBILE -->
+  <button class="mobile-menu-btn" id="mobile-menu-btn">
+    <i class="fas fa-bars"></i>
+  </button>
+
+  <!-- CONTEÚDO PRINCIPAL -->
+  <main class="main-content">
+    
+    <!-- SEÇÃO: MEUS AGENDAMENTOS -->
+    <section id="appointments-section" class="content-section active">
+      <div class="section-header">
+        <h1><i class="fas fa-calendar-check"></i> Meus Agendamentos</h1>
+        <p>Gerencie seus horários agendados</p>
+      </div>
+      <div id="appointments-grid" class="appointments-grid"></div>
+    </section>
+
+    <!-- SEÇÃO: NOVO AGENDAMENTO -->
+    <section id="new-appointment-section" class="content-section">
+      <div class="section-header">
+        <h1><i class="fas fa-plus-circle"></i> Novo Agendamento</h1>
+        <p>Agende seu próximo horário</p>
+      </div>
+
+      <div class="appointment-form-container">
+        <div class="form-card">
+          <label><i class="fas fa-calendar"></i> Data</label>
+          <input type="date" id="date" required>
+
+          <label><i class="fas fa-clock"></i> Horário</label>
+          <select id="time" required>
+            <option value="">Selecione um horário</option>
+            <option value="09:00">09:00</option>
+            <option value="09:30">09:30</option>
+            <option value="10:00">10:00</option>
+            <option value="10:30">10:30</option>
+            <option value="11:00">11:00</option>
+            <option value="11:30">11:30</option>
+            <option value="14:00">14:00</option>
+            <option value="14:30">14:30</option>
+            <option value="15:00">15:00</option>
+            <option value="15:30">15:30</option>
+            <option value="16:00">16:00</option>
+            <option value="16:30">16:30</option>
+            <option value="17:00">17:00</option>
+            <option value="17:30">17:30</option>
+            <option value="18:00">18:00</option>
+            <option value="18:30">18:30</option>
+          </select>
+
+          <label><i class="fas fa-cut"></i> Serviço</label>
+          <select id="service" required>
+            <option value="">Escolha o serviço</option>
+            <option value="Corte Tradicional">Corte Tradicional - R$ 35</option>
+            <option value="Corte Degradê">Corte Degradê - R$ 40</option>
+            <option value="Barba">Barba - R$ 25</option>
+            <option value="Corte + Barba">Corte + Barba - R$ 50</option>
+            <option value="Design Capilar">Design Capilar - R$ 60</option>
+          </select>
+
+          <label><i class="fas fa-user-tie"></i> Barbeiro (Opcional)</label>
+          <select id="barber">
+            <option value="">Sem preferência</option>
+          </select>
+
+          <button class="btn-submit" onclick="createAppointment()">
+            <i class="fas fa-check-circle"></i>
+            Confirmar Agendamento
+          </button>
+
+          <p id="form-message" class="form-message"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SEÇÃO: BARBEIROS -->
+    <section id="barbers-section" class="content-section">
+      <div class="section-header">
+        <h1><i class="fas fa-users"></i> Nossos Barbeiros</h1>
+        <p>Conheça nossa equipe de profissionais</p>
+      </div>
+      <div id="barbers-grid" class="barbers-grid"></div>
+    </section>
+
+    <!-- SEÇÃO: SOBRE NÓS -->
+    <section id="about-section" class="content-section">
+      <div class="section-header">
+        <h1><i class="fas fa-info-circle"></i> Sobre a BarberTime</h1>
+        <p>Conheça nossa história</p>
+      </div>
+
+      <div class="about-content">
+        <div class="about-card">
+          <h3><i class="fas fa-star"></i> Nossa Missão</h3>
+          <p>Proporcionar uma experiência única de cuidado pessoal, unindo técnica clássica com estilo moderno.</p>
+        </div>
+
+        <div class="about-card">
+          <h3><i class="fas fa-trophy"></i> Nossos Valores</h3>
+          <ul>
+            <li><i class="fas fa-check"></i> Excelência em atendimento</li>
+            <li><i class="fas fa-check"></i> Profissionalismo</li>
+            <li><i class="fas fa-check"></i> Respeito ao cliente</li>
+            <li><i class="fas fa-check"></i> Inovação constante</li>
+          </ul>
+        </div>
+
+        <div class="about-card">
+          <h3><i class="fas fa-history"></i> Nossa História</h3>
+          <p>Fundada em 2020, a BarberTime rapidamente se tornou referência em cortes masculinos premium. Com uma equipe altamente qualificada e um ambiente acolhedor, conquistamos a confiança de centenas de clientes.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SEÇÃO: CONTATO -->
+    <section id="contact-section" class="content-section">
+      <div class="section-header">
+        <h1><i class="fas fa-phone"></i> Entre em Contato</h1>
+        <p>Estamos sempre à disposição</p>
+      </div>
+
+      <div class="contact-content">
+        <div class="contact-card">
+          <i class="fas fa-map-marker-alt"></i>
+          <h3>Endereço</h3>
+          <p>Rua das Barbearias, 123<br>Centro - São Paulo/SP</p>
+        </div>
+
+        <div class="contact-card">
+          <i class="fas fa-phone"></i>
+          <h3>Telefone</h3>
+          <p>(11) 99999-9999</p>
+        </div>
+
+        <div class="contact-card">
+          <i class="fas fa-envelope"></i>
+          <h3>Email</h3>
+          <p>contato@barbertime.com</p>
+        </div>
+
+        <div class="contact-card">
+          <i class="fab fa-whatsapp"></i>
+          <h3>WhatsApp</h3>
+          <a href="https://wa.me/5511999999999" target="_blank" class="whatsapp-link">
+            Falar no WhatsApp
+          </a>
+        </div>
+
+        <div class="contact-card">
+          <i class="fab fa-instagram"></i>
+          <h3>Instagram</h3>
+          <p>@barbertime</p>
+        </div>
+
+        <div class="contact-card">
+          <i class="fas fa-clock"></i>
+          <h3>Horário de Funcionamento</h3>
+          <p><strong>Segunda a Sexta:</strong> 09:00 - 20:00</p>
+          <p><strong>Sábado:</strong> 09:00 - 18:00</p>
+          <p><strong>Domingo:</strong> Fechado</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="js/auth.js"></script>
+  <script src="js/dashboard.js"></script>
+</body>
+</html>

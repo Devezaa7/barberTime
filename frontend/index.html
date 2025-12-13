@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BarberTime — Login Premium</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <div class="auth-container">
+    <!-- Logo SVG Inline -->
+    <svg class="logo" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:#F4E4C1" />
+          <stop offset="50%" style="stop-color:#D4AF37" />
+          <stop offset="100%" style="stop-color:#B8941F" />
+        </linearGradient>
+      </defs>
+      <circle cx="100" cy="100" r="95" fill="#0A0A0A" stroke="url(#goldGradient)" stroke-width="3"/>
+      <g transform="translate(100, 100) rotate(-45)">
+        <path d="M -10 -40 L -10 40 L -5 35 L -5 -35 Z" fill="url(#goldGradient)"/>
+        <path d="M 10 -40 L 10 40 L 5 35 L 5 -35 Z" fill="url(#goldGradient)"/>
+        <circle cx="-10" cy="-50" r="12" fill="none" stroke="url(#goldGradient)" stroke-width="2.5"/>
+        <circle cx="10" cy="-50" r="12" fill="none" stroke="url(#goldGradient)" stroke-width="2.5"/>
+        <circle cx="0" cy="0" r="5" fill="url(#goldGradient)"/>
+      </g>
+    </svg>
+    
+    <h1>BARBERTIME</h1>
+    <h2>Excelência em Cada Corte</h2>
+
+    <div class="login-form">
+      <label for="email">Email</label>
+      <input 
+        type="email" 
+        id="email" 
+        placeholder="seu@email.com"
+        autocomplete="email"
+        required
+      >
+
+      <label for="password">Senha</label>
+      <input 
+        type="password" 
+        id="password" 
+        placeholder="••••••••"
+        autocomplete="current-password"
+        required
+      >
+
+      <button class="btn-gold" id="login-btn">
+        ENTRAR
+      </button>
+
+      <p id="error-msg" class="error"></p>
+    </div>
+  </div>
+
+  <script src="js/login.js"></script>
+</body>
+</html>

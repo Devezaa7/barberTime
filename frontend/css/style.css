@@ -1,0 +1,593 @@
+/* ===================================
+   BARBERTIME - DESIGN PREMIUM
+   Inspirado nas melhores barbearias
+   =================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;900&family=Montserrat:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --gold-primary: #D4AF37;
+  --gold-light: #F4E4C1;
+  --gold-dark: #B8941F;
+  --black-primary: #0A0A0A;
+  --black-secondary: #1A1A1A;
+  --black-tertiary: #2A2A2A;
+  --white: #FFFFFF;
+  --gray-light: #B8B8B8;
+  --red-accent: #8B0000;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Montserrat', sans-serif;
+  color: var(--white);
+  background: var(--black-primary);
+  overflow-x: hidden;
+}
+
+h1, h2, h3 {
+  font-family: 'Playfair Display', serif;
+}
+
+/* ===================================
+   PÁGINA DE LOGIN - LUXO TOTAL
+   =================================== */
+
+body:not(.dark-bg) {
+  background: linear-gradient(135deg, rgba(10,10,10,0.95) 0%, rgba(26,26,26,0.9) 100%),
+              url('https://images.unsplash.com/photo-1585747860715-2ba37e788b70?auto=format&fit=crop&w=1920&q=80') center/cover no-repeat fixed;
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+body:not(.dark-bg)::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 20% 50%, rgba(212,175,55,0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 50%, rgba(212,175,55,0.05) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.overlay {
+  display: none;
+}
+
+/* Container de Autenticação - Premium */
+.auth-container {
+  position: relative;
+  z-index: 10;
+  background: linear-gradient(145deg, rgba(26,26,26,0.98) 0%, rgba(10,10,10,0.98) 100%);
+  border: 2px solid var(--gold-primary);
+  border-radius: 20px;
+  padding: 50px 40px;
+  width: 90%;
+  max-width: 450px;
+  text-align: center;
+  box-shadow: 
+    0 20px 60px rgba(0,0,0,0.8),
+    0 0 100px rgba(212,175,55,0.15),
+    inset 0 1px 0 rgba(255,255,255,0.1);
+  backdrop-filter: blur(10px);
+  animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.auth-container::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(45deg, var(--gold-primary), var(--gold-dark), var(--gold-primary));
+  border-radius: 20px;
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.auth-container:hover::before {
+  opacity: 0.2;
+}
+
+.logo {
+  width: 100px;
+  height: 100px;
+  margin: 0 auto 25px;
+  filter: drop-shadow(0 0 20px rgba(212,175,55,0.3));
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+.auth-container h1 {
+  color: var(--gold-primary);
+  font-size: 42px;
+  font-weight: 900;
+  margin: 0 0 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  text-shadow: 
+    0 0 30px rgba(212,175,55,0.5),
+    2px 2px 4px rgba(0,0,0,0.8);
+}
+
+.auth-container h2 {
+  color: var(--gray-light);
+  font-size: 16px;
+  font-weight: 300;
+  font-family: 'Montserrat', sans-serif;
+  margin-bottom: 35px;
+  letter-spacing: 1px;
+}
+
+/* Formulário Premium */
+form {
+  margin-top: 30px;
+}
+
+label {
+  display: block;
+  text-align: left;
+  margin-top: 20px;
+  margin-bottom: 8px;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--gold-light);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+
+input {
+  width: 100%;
+  padding: 16px 20px;
+  border-radius: 12px;
+  border: 2px solid rgba(212,175,55,0.3);
+  background: rgba(26,26,26,0.8);
+  color: var(--white);
+  font-size: 15px;
+  font-family: 'Montserrat', sans-serif;
+  transition: all 0.3s ease;
+  box-shadow: inset 0 2px 6px rgba(0,0,0,0.3);
+}
+
+input:focus {
+  outline: none;
+  border-color: var(--gold-primary);
+  background: rgba(26,26,26,0.95);
+  box-shadow: 
+    inset 0 2px 6px rgba(0,0,0,0.3),
+    0 0 0 4px rgba(212,175,55,0.1),
+    0 0 20px rgba(212,175,55,0.2);
+  transform: translateY(-2px);
+}
+
+input::placeholder {
+  color: rgba(184,184,184,0.5);
+}
+
+/* Botão Premium com Efeito Luxuoso */
+.btn-gold {
+  width: 100%;
+  padding: 18px;
+  margin-top: 30px;
+  background: linear-gradient(135deg, var(--gold-primary) 0%, var(--gold-dark) 100%);
+  border: none;
+  border-radius: 12px;
+  color: var(--black-primary);
+  font-size: 16px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 
+    0 10px 30px rgba(212,175,55,0.3),
+    inset 0 1px 0 rgba(255,255,255,0.3);
+  transition: all 0.4s ease;
+}
+
+.btn-gold::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  transition: left 0.5s;
+}
+
+.btn-gold:hover::before {
+  left: 100%;
+}
+
+.btn-gold:hover {
+  transform: translateY(-3px);
+  box-shadow: 
+    0 15px 40px rgba(212,175,55,0.5),
+    inset 0 1px 0 rgba(255,255,255,0.4);
+}
+
+.btn-gold:active {
+  transform: translateY(-1px);
+}
+
+/* Mensagem de Erro Elegante */
+.error {
+  color: #FF6B6B;
+  margin-top: 20px;
+  padding: 12px;
+  background: rgba(139,0,0,0.1);
+  border: 1px solid rgba(255,107,107,0.3);
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  display: none;
+}
+
+.error:not(:empty) {
+  display: block;
+  animation: shake 0.4s;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-10px); }
+  75% { transform: translateX(10px); }
+}
+
+/* ===================================
+   PÁGINAS INTERNAS - LUXO PREMIUM
+   =================================== */
+
+.dark-bg {
+  background: var(--black-primary);
+  min-height: 100vh;
+}
+
+/* Header Sofisticado */
+.header {
+  background: linear-gradient(135deg, var(--black-secondary) 0%, var(--black-primary) 100%);
+  border-bottom: 3px solid var(--gold-primary);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 40px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(10px);
+}
+
+.header::before {
+  content: '';
+  position: absolute;
+  bottom: -3px;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--gold-primary), transparent);
+  animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+
+.logo-header {
+  width: 60px;
+  height: 60px;
+  filter: drop-shadow(0 0 10px rgba(212,175,55,0.3));
+  transition: transform 0.3s;
+}
+
+.logo-header:hover {
+  transform: scale(1.1) rotate(5deg);
+}
+
+.header h1 {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--gold-primary);
+  letter-spacing: 2px;
+  text-shadow: 0 2px 10px rgba(212,175,55,0.3);
+  flex: 1;
+  text-align: center;
+}
+
+/* Botão Logout Premium */
+.logout-btn {
+  background: linear-gradient(135deg, var(--red-accent) 0%, #A00000 100%);
+  padding: 12px 28px;
+  border-radius: 10px;
+  border: 2px solid rgba(139,0,0,0.5);
+  color: var(--white);
+  font-weight: 600;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 
+    0 4px 15px rgba(139,0,0,0.3),
+    inset 0 1px 0 rgba(255,255,255,0.1);
+}
+
+.logout-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 6px 20px rgba(139,0,0,0.5),
+    inset 0 1px 0 rgba(255,255,255,0.2);
+  border-color: rgba(139,0,0,0.8);
+}
+
+/* Container Premium */
+.container {
+  max-width: 600px;
+  background: linear-gradient(145deg, var(--black-secondary) 0%, var(--black-tertiary) 100%);
+  padding: 40px;
+  margin: 50px auto;
+  border-radius: 20px;
+  border: 2px solid var(--gold-primary);
+  box-shadow: 
+    0 20px 60px rgba(0,0,0,0.6),
+    0 0 100px rgba(212,175,55,0.1),
+    inset 0 1px 0 rgba(255,255,255,0.05);
+  position: relative;
+}
+
+.container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold-primary), transparent);
+}
+
+/* Tabela Luxuosa */
+table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-top: 30px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+}
+
+th {
+  background: linear-gradient(135deg, var(--gold-primary) 0%, var(--gold-dark) 100%);
+  color: var(--black-primary);
+  padding: 18px;
+  font-weight: 700;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+th:first-child {
+  border-top-left-radius: 12px;
+}
+
+th:last-child {
+  border-top-right-radius: 12px;
+}
+
+td {
+  padding: 18px;
+  background: rgba(26,26,26,0.6);
+  border-bottom: 1px solid rgba(212,175,55,0.2);
+  text-align: center;
+  font-size: 15px;
+  color: var(--gray-light);
+  transition: all 0.3s;
+}
+
+tr:hover td {
+  background: rgba(212,175,55,0.05);
+  color: var(--white);
+}
+
+tr:last-child td:first-child {
+  border-bottom-left-radius: 12px;
+}
+
+tr:last-child td:last-child {
+  border-bottom-right-radius: 12px;
+}
+
+/* Link Elegante */
+.link {
+  display: inline-block;
+  margin-top: 30px;
+  padding: 12px 30px;
+  color: var(--gold-primary);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 15px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  border: 2px solid var(--gold-primary);
+  border-radius: 10px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.link::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: var(--gold-primary);
+  transition: left 0.4s;
+  z-index: -1;
+}
+
+.link:hover::before {
+  left: 0;
+}
+
+.link:hover {
+  color: var(--black-primary);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(212,175,55,0.3);
+}
+
+/* Mensagem de Resposta */
+#resp-msg {
+  margin-top: 25px;
+  padding: 18px;
+  border-radius: 12px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 15px;
+  border: 2px solid;
+  animation: slideIn 0.4s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+#resp-msg:not(:empty) {
+  background: rgba(76,175,80,0.1);
+  border-color: rgba(76,175,80,0.5);
+  color: #4CAF50;
+}
+
+/* Scroll Personalizado */
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--black-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--gold-primary), var(--gold-dark));
+  border-radius: 6px;
+  border: 2px solid var(--black-primary);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, var(--gold-light), var(--gold-primary));
+}
+
+/* Responsividade Premium */
+@media (max-width: 768px) {
+  .auth-container {
+    padding: 40px 30px;
+    width: 95%;
+  }
+  
+  .auth-container h1 {
+    font-size: 32px;
+  }
+  
+  .header {
+    padding: 15px 20px;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .header h1 {
+    font-size: 22px;
+  }
+  
+  .container {
+    padding: 30px 20px;
+    margin: 30px 15px;
+  }
+  
+  table {
+    font-size: 13px;
+  }
+  
+  th, td {
+    padding: 12px 8px;
+  }
+}
+
+/* Efeitos de Loading */
+.loading {
+  pointer-events: none;
+  opacity: 0.6;
+  position: relative;
+}
+
+.loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 30px;
+  height: 30px;
+  margin: -15px 0 0 -15px;
+  border: 3px solid var(--gold-primary);
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Detalhes Decorativos */
+.container::after {
+  content: '✂';
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  font-size: 40px;
+  color: var(--gold-primary);
+  opacity: 0.1;
+  transform: rotate(-15deg);
+}
