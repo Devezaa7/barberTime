@@ -1,4 +1,4 @@
-// frontend/js/login.js
+// frontend/js/login.js - VERSÃO CORRIGIDA
 
 const API_URL = 'http://localhost:3000';
 
@@ -7,6 +7,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const emailInput = document.getElementById('email');
   const passwordInput = document.getElementById('password');
   const errorMsg = document.getElementById('error-msg');
+
+  // Se já está logado, redirecionar
+  if (localStorage.getItem('token')) {
+    window.location.href = 'dashboard.html';
+    return;
+  }
 
   // Login ao pressionar Enter
   emailInput.addEventListener('keypress', (e) => {
@@ -23,27 +29,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const email = emailInput.value.trim();
     const password = passwordInput.value.trim();
 
-    // Limpar mensagem de erro
     errorMsg.textContent = '';
     errorMsg.style.display = 'none';
 
-    // Validar campos
     if (!email || !password) {
       showError('Preencha todos os campos!');
       return;
     }
 
-    // Validar formato de email
     if (!isValidEmail(email)) {
       showError('Email inválido!');
       return;
     }
 
-    // Loading state
     loginBtn.disabled = true;
-    loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> AGUARDE...';
+    loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ENTRANDO...';
 
     try {
+      console.log('🔄 Tentando login...', { email });
+
       const response = await fetch(`${API_URL}/login`, {
         method: 'POST',
         headers: {
@@ -52,33 +56,38 @@ document.addEventListener('DOMContentLoaded', () => {
         body: JSON.stringify({ email, password })
       });
 
+      console.log('📡 Status da resposta:', response.status);
+
       const data = await response.json();
+      console.log('📦 Dados recebidos:', data);
 
       if (!response.ok) {
-        throw new Error(data.error || 'Email ou senha incorretos!');
+        throw new Error(data.error || data.message || 'Email ou senha incorretos!');
       }
 
-      // Salvar token
+      // Salvar dados do usuário
       localStorage.setItem('token', data.token);
-      
-      // Sucesso visual
+      localStorage.setItem('userName', data.user?.name || data.name || 'Usuário');
+      localStorage.setItem('userEmail', data.user?.email || email);
+      localStorage.setItem('userId', data.user?.id || data.id || '1');
+
+      console.log('✅ Login realizado com sucesso!');
+
       loginBtn.innerHTML = '<i class="fas fa-check-circle"></i> SUCESSO!';
       loginBtn.style.background = 'linear-gradient(135deg, #4CAF50, #45a049)';
 
-      // Redirecionar
       setTimeout(() => {
         window.location.href = 'dashboard.html';
       }, 500);
 
     } catch (error) {
-      console.error('Erro no login:', error);
-      showError(error.message || 'Erro ao conectar ao servidor.');
+      console.error('❌ Erro no login:', error);
+      showError(error.message || 'Erro ao conectar ao servidor. Verifique se o backend está rodando.');
       
-      // Resetar botão
       loginBtn.disabled = false;
       loginBtn.innerHTML = 'ENTRAR';
 
-      // Shake na tela
+      // Shake animation
       document.querySelector('.auth-container').style.animation = 'shake 0.4s';
       setTimeout(() => {
         document.querySelector('.auth-container').style.animation = '';
@@ -95,3 +104,14 @@ document.addEventListener('DOMContentLoaded', () => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   }
 });
+
+// CSS para shake (adicionar se não tiver)
+const style = document.createElement('style');
+style.textContent = `
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-10px); }
+    75% { transform: translateX(10px); }
+  }
+`;
+document.head.appendChild(style);
