@@ -1,15 +1,23 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BarberTime — Login Premium</title>
-  <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BarberTime — Criar Conta</title>
+
+  <!-- CSS PRINCIPAL -->
+  <link rel="stylesheet" href="css/style.css" />
+
+  <!-- Ícones -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+  />
 </head>
 <body>
   <div class="auth-container">
-    <!-- Logo SVG -->
+
+    <!-- LOGO -->
     <svg class="logo" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
       <defs>
         <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -27,49 +35,65 @@
         <circle cx="0" cy="0" r="5" fill="url(#goldGradient)"/>
       </g>
     </svg>
-    
-    <h1>BARBERTIME</h1>
-    <h2>Excelência em Cada Corte</h2>
 
+    <h1>BARBERTIME</h1>
+    <h2>Crie sua conta premium</h2>
+
+    <!-- FORMULÁRIO DE CADASTRO -->
     <div class="login-form">
+
+      <label for="name">Nome completo</label>
+      <input
+        type="text"
+        id="name"
+        placeholder="Seu nome"
+        required
+      />
+
       <label for="email">Email</label>
-      <input 
-        type="email" 
-        id="email" 
+      <input
+        type="email"
+        id="email"
         placeholder="seu@email.com"
         autocomplete="email"
         required
-      >
+      />
 
       <label for="password">Senha</label>
-      <input 
-        type="password" 
-        id="password" 
+      <input
+        type="password"
+        id="password"
         placeholder="••••••••"
-        autocomplete="current-password"
+        autocomplete="new-password"
         required
-      >
+      />
 
-      <!-- Link Esqueci Senha -->
-      <div class="forgot-password-link">
-        <a href="forgot-password.html">
-          <i class="fas fa-key"></i> Esqueci minha senha
-        </a>
-      </div>
+      <label for="confirmPassword">Confirmar senha</label>
+      <input
+        type="password"
+        id="confirmPassword"
+        placeholder="••••••••"
+        autocomplete="new-password"
+        required
+      />
 
-      <button class="btn-gold" id="login-btn">
-        ENTRAR
+      <button class="btn-gold" id="register-btn">
+        CRIAR CONTA
       </button>
 
+      <!-- MENSAGEM DE ERRO / SUCESSO -->
       <p id="error-msg" class="error"></p>
+      <!-- <p class="success">Conta criada com sucesso!</p> -->
     </div>
 
-    <!-- Links de Cadastro -->
+    <!-- LINKS -->
     <div class="auth-links">
-      <p>Não tem uma conta? <a href="register.html">Cadastre-se aqui</a></p>
+      <p>Já tem uma conta? <a href="login.html">Entrar</a></p>
     </div>
+
   </div>
 
-  <script src="js/login.js"></script>
+  <!-- JS DE CADASTRO (opcional depois) -->
+  <script src="js/register.js"></script>
 </body>
 </html>

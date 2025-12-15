@@ -1,0 +1,223 @@
+openapi: 3.0.0
+info:
+  title: BarberTime API
+  description: API de autenticação e gerenciamento de usuários do BarberTime
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:3000
+    description: Ambiente local
+
+tags:
+  - name: Auth
+    description: Autenticação
+  - name: Usuários
+    description: Gerenciamento de usuários
+
+paths:
+
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Login do usuário
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        200:
+          description: Login realizado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+        401:
+          description: Credenciais inválidas
+
+  /auth/register:
+    post:
+      tags: [Auth]
+      summary: Registro de usuário
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterRequest"
+      responses:
+        201:
+          description: Usuário registrado com sucesso
+        400:
+          description: Erro de validação
+
+  /auth/me:
+    get:
+      tags: [Auth]
+      summary: Retorna dados do usuário logado
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: Usuário autenticado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
+  /usuarios:
+    post:
+      tags: [Usuários]
+      summary: Criar usuário (ADMIN)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterRequest"
+      responses:
+        201:
+          description: Usuário criado com sucesso
+
+    get:
+      tags: [Usuários]
+      summary: Listar usuários (ADMIN)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            example: 1
+        - in: query
+          name: perPage
+          schema:
+            type: integer
+            example: 10
+      responses:
+        200:
+          description: Lista paginada de usuários
+
+  /usuarios/{id}:
+    get:
+      tags: [Usuários]
+      summary: Buscar usuário por ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Usuário encontrado
+
+    put:
+      tags: [Usuários]
+      summary: Atualizar usuário
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateUserRequest"
+      responses:
+        200:
+          description: Usuário atualizado
+
+    delete:
+      tags: [Usuários]
+      summary: Deletar usuário (ADMIN)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Usuário deletado
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          example: admin@barbertime.com
+        password:
+          type: string
+          example: "123456"
+
+    LoginResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        user:
+          $ref: "#/components/schemas/User"
+
+    RegisterRequest:
+      type: object
+      required: [name, email, password]
+      properties:
+        name:
+          type: string
+          example: Samuel Sales
+        email:
+          type: string
+          example: samuel@email.com
+        password:
+          type: string
+          example: "123456"
+
+    UpdateUserRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+          example: ADMIN
+        createdAt:
+          type: string
+          format: date-time
