@@ -5,10 +5,11 @@
   "main": "src/server.js",
   "type": "module",
  "scripts": {
+ "scripts": {
   "dev": "nodemon src/server.js",
   "start": "node src/server.js",
-  "postinstall": "prisma generate",
-  "migrate:deploy": "prisma migrate deploy",
+  "postinstall": "prisma generate --schema=prisma/schema.prisma",
+  "migrate:deploy": "prisma migrate deploy --schema=prisma/schema.prisma",
   "prisma:migrate": "npx prisma migrate dev",
   "prisma:studio": "npx prisma studio",
   "prisma:generate": "npx prisma generate",
