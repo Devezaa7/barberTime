@@ -1,6 +1,6 @@
 // Dashboard BarberTime
 
-const API_URL = 'https://barbertime-api.onrender.com/';
+const API_URL = 'https://barbertime-api.onrender.com';
 
 const NOSSOS_BARBEIROS = [
   {
