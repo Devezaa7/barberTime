@@ -2,8 +2,7 @@ import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import AuthService from '../services/authService.js';
 import { loginValidation, registerValidation } from '../validations/authValidation.js';
-import prisma from '../configuração/prisma.js';
-
+import prisma from '../config/database.js';
 const AuthController = {
   login: async (req, res) => {
     try {
