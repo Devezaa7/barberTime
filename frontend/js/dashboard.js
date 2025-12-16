@@ -1,4 +1,4 @@
-// Dashboard BarberTime
+// Dashboard BarberTime - VERSÃO COMPLETA COM PERMISSÕES
 
 const API_URL = 'https://barbertime-api.onrender.com';
 
@@ -64,6 +64,7 @@ document.addEventListener('DOMContentLoaded', inicializarDashboard);
 function inicializarDashboard() {
   verificarSeEstaLogado();
   mostrarInformacoesDoUsuario();
+  ajustarMenuPorTipoDeUsuario();
   buscarMeusAgendamentos();
   mostrarNossosBarbeiros();
   carregarServicosDisponiveis();
@@ -92,11 +93,46 @@ function pegarTokenDoUsuario() {
   return localStorage.getItem('token');
 }
 
+function pegarTipoDoUsuario() {
+  return localStorage.getItem('userType') || 'CLIENTE';
+}
+
 function sair() {
   if (confirm('Tem certeza que deseja sair?')) {
     localStorage.clear();
     window.location.href = 'index.html';
   }
+}
+
+// 🆕 Ajusta o menu baseado no tipo de usuário
+function ajustarMenuPorTipoDeUsuario() {
+  const tipo = pegarTipoDoUsuario();
+  const sidebar = document.getElementById('sidebar');
+  
+  if (!sidebar) return;
+  
+  // Remove itens que não são para o tipo do usuário
+  const itensMenu = sidebar.querySelectorAll('.nav-item');
+  
+  itensMenu.forEach(item => {
+    const secao = item.getAttribute('data-section');
+    
+    // CLIENTE: só pode ver agendamentos e novo agendamento
+    if (tipo === 'CLIENTE') {
+      if (secao !== 'appointments' && secao !== 'new-appointment' && secao !== 'barbers') {
+        item.style.display = 'none';
+      }
+    }
+    
+    // BARBEIRO: pode ver seus agendamentos e estatísticas
+    if (tipo === 'BARBEIRO') {
+      if (secao === 'new-appointment') {
+        item.style.display = 'none'; // Barbeiros não agendam para si mesmos
+      }
+    }
+  });
+  
+  console.log(`👤 Dashboard configurado para: ${tipo}`);
 }
 
 // navegação
@@ -153,17 +189,39 @@ function configurarMenuMobile() {
 function mostrarInformacoesDoUsuario() {
   const nome = localStorage.getItem('userName') || 'Usuário';
   const email = localStorage.getItem('userEmail') || 'email@exemplo.com';
+  const tipo = pegarTipoDoUsuario();
   
   const elementoNome = document.getElementById('user-name');
   const elementoEmail = document.getElementById('user-email');
   
-  if (elementoNome) elementoNome.textContent = nome;
+  if (elementoNome) {
+    elementoNome.textContent = nome;
+    
+    // Adiciona badge do tipo de usuário
+    const badge = document.createElement('span');
+    badge.style.cssText = `
+      background: #D4AF37;
+      color: #0A0A0A;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: bold;
+      margin-left: 10px;
+    `;
+    badge.textContent = tipo;
+    
+    if (!elementoNome.querySelector('span')) {
+      elementoNome.appendChild(badge);
+    }
+  }
+  
   if (elementoEmail) elementoEmail.textContent = email;
 }
 
 // agendamentos
 async function buscarMeusAgendamentos() {
   const token = pegarTokenDoUsuario();
+  const tipo = pegarTipoDoUsuario();
   const container = document.getElementById('appointments-grid');
   
   if (!container) return;
@@ -178,17 +236,27 @@ async function buscarMeusAgendamentos() {
       }
     });
     
-    if (!resposta.ok) throw new Error(`Erro ${resposta.status}`);
+    if (!resposta.ok) {
+      const erroDetalhado = await resposta.json().catch(() => ({}));
+      console.error('Erro da API:', erroDetalhado);
+      throw new Error(erroDetalhado.message || erroDetalhado.error || `Erro ${resposta.status}`);
+    }
     
     const dados = await resposta.json();
     const agendamentos = dados.data || [];
     
+    console.log(`📅 ${agendamentos.length} agendamento(s) carregado(s) para ${tipo}`);
+    
     if (agendamentos.length === 0) {
+      const mensagem = tipo === 'CLIENTE' 
+        ? 'Você ainda não tem agendamentos. Clique em "Novo Agendamento" para agendar!'
+        : 'Nenhum agendamento encontrado';
+        
       container.innerHTML = `
         <div class="empty-state">
           <i class="fas fa-calendar-times"></i>
-          <h3>Nenhum agendamento ainda</h3>
-          <p>Clique em "Novo Agendamento" para criar um!</p>
+          <h3>Nenhum agendamento</h3>
+          <p>${mensagem}</p>
         </div>
       `;
       return;
@@ -196,22 +264,26 @@ async function buscarMeusAgendamentos() {
     
     container.innerHTML = '';
     agendamentos.forEach(agendamento => {
-      const card = criarCardDeAgendamento(agendamento);
+      const card = criarCardDeAgendamento(agendamento, tipo);
       container.appendChild(card);
     });
     
   } catch (erro) {
+    console.error('❌ Erro ao buscar agendamentos:', erro);
     container.innerHTML = `
       <div class="empty-state">
         <i class="fas fa-exclamation-triangle"></i>
-        <h3>Erro ao carregar</h3>
+        <h3>Erro ao carregar agendamentos</h3>
         <p>${erro.message}</p>
+        <button onclick="buscarMeusAgendamentos()" class="btn-primary" style="margin-top: 15px; padding: 10px 20px; background: #D4AF37; color: #0A0A0A; border: none; border-radius: 5px; cursor: pointer;">
+          <i class="fas fa-sync"></i> Tentar Novamente
+        </button>
       </div>
     `;
   }
 }
 
-function criarCardDeAgendamento(agendamento) {
+function criarCardDeAgendamento(agendamento, tipoUsuario) {
   const card = document.createElement('div');
   card.className = 'appointment-card';
   
@@ -237,13 +309,22 @@ function criarCardDeAgendamento(agendamento) {
   
   const status = statusEmPortugues[agendamento.status] || agendamento.status;
   
+  // 🆕 Para BARBEIRO, mostra o nome do cliente
+  // Para CLIENTE, mostra o nome do barbeiro
+  let infoAdicional = '';
+  if (tipoUsuario === 'BARBEIRO' && agendamento.cliente) {
+    infoAdicional = `<p><i class="fas fa-user"></i> Cliente: ${agendamento.cliente.nome}</p>`;
+  } else if (tipoUsuario === 'CLIENTE' && agendamento.barbeiro) {
+    infoAdicional = `<p><i class="fas fa-user-tie"></i> Barbeiro: ${agendamento.barbeiro.nome}</p>`;
+  }
+  
   card.innerHTML = `
     <div class="appointment-status">${status}</div>
     <div class="appointment-info">
       <p><i class="fas fa-calendar-day"></i> <strong>${dataFormatada}</strong></p>
       <p><i class="fas fa-clock"></i> <strong>${horaFormatada}</strong></p>
       <p><i class="fas fa-cut"></i> ${agendamento.servico?.nome || 'Serviço'}</p>
-      ${agendamento.barbeiro ? `<p><i class="fas fa-user-tie"></i> ${agendamento.barbeiro.nome}</p>` : ''}
+      ${infoAdicional}
       ${agendamento.observacao ? `<p><i class="fas fa-comment"></i> ${agendamento.observacao}</p>` : ''}
     </div>
     <div class="appointment-actions">
@@ -259,6 +340,13 @@ function criarCardDeAgendamento(agendamento) {
 
 async function criarNovoAgendamento() {
   const token = pegarTokenDoUsuario();
+  const tipo = pegarTipoDoUsuario();
+  
+  // 🆕 Apenas CLIENTES e ADMINS podem criar agendamentos
+  if (tipo === 'BARBEIRO') {
+    mostrarMensagem('Barbeiros não podem criar agendamentos para si mesmos', 'error');
+    return;
+  }
   
   const data = document.getElementById('date').value;
   const hora = document.getElementById('time').value;
@@ -266,16 +354,39 @@ async function criarNovoAgendamento() {
   const barbeiroId = document.getElementById('barber').value;
   
   if (!data || !hora || !servicoId || !barbeiroId) {
-    mostrarMensagem('Preencha todos os campos', 'error');
+    mostrarMensagem('⚠️ Preencha todos os campos obrigatórios', 'error');
+    return;
+  }
+  
+  // Validação: Verifica se são UUIDs válidos
+  const uuidRegex = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+  
+  if (!uuidRegex.test(servicoId)) {
+    mostrarMensagem('❌ ID do serviço inválido. Recarregue a página e tente novamente.', 'error');
+    console.error('servicoId inválido:', servicoId);
+    return;
+  }
+  
+  if (!uuidRegex.test(barbeiroId)) {
+    mostrarMensagem('❌ ID do barbeiro inválido. Recarregue a página e tente novamente.', 'error');
+    console.error('barbeiroId inválido:', barbeiroId);
     return;
   }
   
   const botao = document.querySelector('.btn-submit');
+  const textoOriginal = botao.innerHTML;
   botao.disabled = true;
   botao.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Criando...';
   
   try {
     const dataHoraCompleta = new Date(`${data}T${hora}:00`).toISOString();
+    
+    console.log('📤 Enviando agendamento:', {
+      dataHora: dataHoraCompleta,
+      servicoId,
+      barbeiroId,
+      usuario: tipo
+    });
     
     const resposta = await fetch(`${API_URL}/api/agendamentos`, {
       method: 'POST',
@@ -292,11 +403,13 @@ async function criarNovoAgendamento() {
     
     const resultado = await resposta.json();
     
+    console.log('📥 Resposta do servidor:', resultado);
+    
     if (!resposta.ok) {
-      throw new Error(resultado.error || resultado.message || 'Erro ao criar');
+      throw new Error(resultado.error || resultado.message || 'Erro ao criar agendamento');
     }
     
-    mostrarMensagem('Agendamento criado!', 'success');
+    mostrarMensagem('✅ Agendamento criado com sucesso!', 'success');
     
     // limpa form
     document.getElementById('date').value = '';
@@ -311,15 +424,16 @@ async function criarNovoAgendamento() {
     }, 2000);
     
   } catch (erro) {
-    mostrarMensagem(`Erro: ${erro.message}`, 'error');
+    console.error('❌ Erro ao criar agendamento:', erro);
+    mostrarMensagem(`❌ Erro: ${erro.message}`, 'error');
   } finally {
     botao.disabled = false;
-    botao.innerHTML = '<i class="fas fa-check-circle"></i> Confirmar Agendamento';
+    botao.innerHTML = textoOriginal;
   }
 }
 
 async function cancelarAgendamento(id) {
-  if (!confirm('Cancelar este agendamento?')) return;
+  if (!confirm('❓ Tem certeza que deseja cancelar este agendamento?')) return;
   
   const token = pegarTokenDoUsuario();
   
@@ -337,11 +451,11 @@ async function cancelarAgendamento(id) {
       throw new Error(erro.error || 'Erro ao cancelar');
     }
     
-    alert('Agendamento cancelado');
+    alert('✅ Agendamento cancelado com sucesso!');
     buscarMeusAgendamentos();
     
   } catch (erro) {
-    alert(`Erro: ${erro.message}`);
+    alert(`❌ Erro: ${erro.message}`);
   }
 }
 
@@ -354,12 +468,20 @@ async function carregarServicosDisponiveis() {
   if (!selectServico || !selectBarbeiro) return;
   
   try {
+    console.log('🔄 Carregando serviços e barbeiros...');
+    
     const respostaServicos = await fetch(`${API_URL}/api/servicos`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
     
+    if (!respostaServicos.ok) {
+      throw new Error('Erro ao carregar serviços');
+    }
+    
     const dadosServicos = await respostaServicos.json();
     const servicos = dadosServicos.data || [];
+    
+    console.log('📋 Serviços recebidos:', servicos.length);
     
     selectServico.innerHTML = '<option value="">Escolha o serviço</option>';
     
@@ -375,11 +497,17 @@ async function carregarServicosDisponiveis() {
       headers: { 'Authorization': `Bearer ${token}` }
     });
     
+    if (!respostaUsuarios.ok) {
+      throw new Error('Erro ao carregar barbeiros');
+    }
+    
     const dadosUsuarios = await respostaUsuarios.json();
     const usuarios = dadosUsuarios.data || [];
     const barbeiros = usuarios.filter(u => u.tipo === 'BARBEIRO');
     
-    selectBarbeiro.innerHTML = '<option value="">Barbeiro selecionado automaticamente</option>';
+    console.log('💈 Barbeiros disponíveis:', barbeiros.length);
+    
+    selectBarbeiro.innerHTML = '<option value="">Escolha o barbeiro</option>';
     
     barbeiros.forEach(barbeiro => {
       const opcao = document.createElement('option');
@@ -388,15 +516,24 @@ async function carregarServicosDisponiveis() {
       selectBarbeiro.appendChild(opcao);
     });
     
-    // quando escolhe serviço, já seleciona o barbeiro
+    // Quando escolhe serviço, seleciona automaticamente o barbeiro
     selectServico.addEventListener('change', (e) => {
       const opcaoSelecionada = e.target.options[e.target.selectedIndex];
       const barbeiroId = opcaoSelecionada.dataset.barbeiroId;
-      if (barbeiroId) selectBarbeiro.value = barbeiroId;
+      
+      console.log('🎯 Serviço selecionado:', {
+        servicoId: opcaoSelecionada.value,
+        barbeiroId: barbeiroId
+      });
+      
+      if (barbeiroId) {
+        selectBarbeiro.value = barbeiroId;
+      }
     });
     
   } catch (erro) {
-    console.error('Erro ao carregar serviços:', erro);
+    console.error('❌ Erro ao carregar serviços:', erro);
+    mostrarMensagem('Erro ao carregar serviços. Recarregue a página.', 'error');
   }
 }
 

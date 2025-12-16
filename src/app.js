@@ -1,6 +1,5 @@
 import express from 'express';
 import cors from 'cors';
-import path from 'path';
 import swaggerUi from 'swagger-ui-express';
 import YAML from 'yamljs';
 
@@ -11,32 +10,31 @@ import errorHandler from './middlewares/errorHandler.js';
 
 const app = express();
 
-/* 🔹 MIDDLEWARES GLOBAIS */
+/* MIDDLEWARES GLOBAIS */
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-/* 🔹 ROTA RAIZ */
+/* ROTA RAIZ */
 app.get('/', (req, res) => {
   res.json({
-    app: 'BarberTime',
+    app: 'BarberTime API',
     version: '1.0.0',
+    status: 'running',
   });
 });
 
-/* 🔹 SWAGGER */
-const swaggerUi = require('swagger-ui-express');
-const YAML = require('yamljs');
+/* SWAGGER */
 const swaggerDocument = YAML.load('./src/docs/swagger.yaml');
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-/* 🔹 ROTAS DA API */
+/* ROTAS DA API */
 app.use('/api', routes);
 app.use('/auth', authRoutes);
 app.use('/usuarios', usuarioRoutes);
 
-/* 🔹 TRATAMENTO DE ERROS (SEMPRE POR ÚLTIMO) */
+/* TRATAMENTO DE ERROS (SEMPRE POR ÚLTIMO) */
 app.use(errorHandler);
 
 export default app;
