@@ -1,4 +1,4 @@
-// Dashboard BarberTime - VERSÃO COMPLETA COM PERMISSÕES
+// Dashboard BarberTime - VERSÃO CORRIGIDA
 
 const API_URL = 'https://barbertime-api.onrender.com';
 
@@ -59,6 +59,9 @@ const NOSSOS_BARBEIROS = [
   }
 ];
 
+let servicosCarregados = [];
+let barbeirosCarregados = [];
+
 document.addEventListener('DOMContentLoaded', inicializarDashboard);
 
 function inicializarDashboard() {
@@ -71,7 +74,6 @@ function inicializarDashboard() {
   configurarNavegacao();
   configurarMenuMobile();
   
-  // não deixa agendar no passado
   const inputData = document.getElementById('date');
   if (inputData) {
     const hoje = new Date().toISOString().split('T')[0];
@@ -79,7 +81,6 @@ function inicializarDashboard() {
   }
 }
 
-// auth
 function verificarSeEstaLogado() {
   const token = pegarTokenDoUsuario();
   if (!token) {
@@ -104,30 +105,26 @@ function sair() {
   }
 }
 
-// 🆕 Ajusta o menu baseado no tipo de usuário
 function ajustarMenuPorTipoDeUsuario() {
   const tipo = pegarTipoDoUsuario();
   const sidebar = document.getElementById('sidebar');
   
   if (!sidebar) return;
   
-  // Remove itens que não são para o tipo do usuário
   const itensMenu = sidebar.querySelectorAll('.nav-item');
   
   itensMenu.forEach(item => {
     const secao = item.getAttribute('data-section');
     
-    // CLIENTE: só pode ver agendamentos e novo agendamento
     if (tipo === 'CLIENTE') {
       if (secao !== 'appointments' && secao !== 'new-appointment' && secao !== 'barbers') {
         item.style.display = 'none';
       }
     }
     
-    // BARBEIRO: pode ver seus agendamentos e estatísticas
     if (tipo === 'BARBEIRO') {
       if (secao === 'new-appointment') {
-        item.style.display = 'none'; // Barbeiros não agendam para si mesmos
+        item.style.display = 'none';
       }
     }
   });
@@ -135,7 +132,6 @@ function ajustarMenuPorTipoDeUsuario() {
   console.log(`👤 Dashboard configurado para: ${tipo}`);
 }
 
-// navegação
 function configurarNavegacao() {
   const itensDoMenu = document.querySelectorAll('.nav-item');
   const secoes = document.querySelectorAll('.content-section');
@@ -144,11 +140,9 @@ function configurarNavegacao() {
     item.addEventListener('click', (e) => {
       e.preventDefault();
       
-      // tira active de tudo
       itensDoMenu.forEach(i => i.classList.remove('active'));
       secoes.forEach(s => s.classList.remove('active'));
       
-      // bota active no item clicado
       item.classList.add('active');
       
       const nomeSecao = item.getAttribute('data-section');
@@ -158,7 +152,6 @@ function configurarNavegacao() {
         secaoParaMostrar.classList.add('active');
       }
       
-      // fecha menu no mobile
       const menuLateral = document.getElementById('sidebar');
       if (menuLateral) {
         menuLateral.classList.remove('active');
@@ -177,7 +170,6 @@ function configurarMenuMobile() {
     menuLateral.classList.toggle('active');
   });
   
-  // fecha se clicar fora
   document.addEventListener('click', (e) => {
     const clicouFora = !menuLateral.contains(e.target) && !botaoMenu.contains(e.target);
     if (clicouFora) {
@@ -197,7 +189,6 @@ function mostrarInformacoesDoUsuario() {
   if (elementoNome) {
     elementoNome.textContent = nome;
     
-    // Adiciona badge do tipo de usuário
     const badge = document.createElement('span');
     badge.style.cssText = `
       background: #D4AF37;
@@ -218,7 +209,6 @@ function mostrarInformacoesDoUsuario() {
   if (elementoEmail) elementoEmail.textContent = email;
 }
 
-// agendamentos
 async function buscarMeusAgendamentos() {
   const token = pegarTokenDoUsuario();
   const tipo = pegarTipoDoUsuario();
@@ -309,8 +299,6 @@ function criarCardDeAgendamento(agendamento, tipoUsuario) {
   
   const status = statusEmPortugues[agendamento.status] || agendamento.status;
   
-  // 🆕 Para BARBEIRO, mostra o nome do cliente
-  // Para CLIENTE, mostra o nome do barbeiro
   let infoAdicional = '';
   if (tipoUsuario === 'BARBEIRO' && agendamento.cliente) {
     infoAdicional = `<p><i class="fas fa-user"></i> Cliente: ${agendamento.cliente.nome}</p>`;
@@ -342,7 +330,6 @@ async function criarNovoAgendamento() {
   const token = pegarTokenDoUsuario();
   const tipo = pegarTipoDoUsuario();
   
-  // 🆕 Apenas CLIENTES e ADMINS podem criar agendamentos
   if (tipo === 'BARBEIRO') {
     mostrarMensagem('Barbeiros não podem criar agendamentos para si mesmos', 'error');
     return;
@@ -358,7 +345,6 @@ async function criarNovoAgendamento() {
     return;
   }
   
-  // Validação: Verifica se são UUIDs válidos
   const uuidRegex = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
   
   if (!uuidRegex.test(servicoId)) {
@@ -411,7 +397,6 @@ async function criarNovoAgendamento() {
     
     mostrarMensagem('✅ Agendamento criado com sucesso!', 'success');
     
-    // limpa form
     document.getElementById('date').value = '';
     document.getElementById('time').value = '';
     document.getElementById('service').value = '';
@@ -459,7 +444,7 @@ async function cancelarAgendamento(id) {
   }
 }
 
-// serviços
+// ✅ FUNÇÃO CORRIGIDA - Extrai barbeiros dos serviços
 async function carregarServicosDisponiveis() {
   const token = pegarTokenDoUsuario();
   const selectServico = document.getElementById('service');
@@ -468,7 +453,7 @@ async function carregarServicosDisponiveis() {
   if (!selectServico || !selectBarbeiro) return;
   
   try {
-    console.log('🔄 Carregando serviços e barbeiros...');
+    console.log('🔄 Carregando serviços...');
     
     const respostaServicos = await fetch(`${API_URL}/api/servicos`, {
       headers: { 'Authorization': `Bearer ${token}` }
@@ -479,57 +464,59 @@ async function carregarServicosDisponiveis() {
     }
     
     const dadosServicos = await respostaServicos.json();
-    const servicos = dadosServicos.data || [];
+    servicosCarregados = dadosServicos.data || [];
     
-    console.log('📋 Serviços recebidos:', servicos.length);
+    console.log('📋 Serviços recebidos:', servicosCarregados.length);
     
+    // Popula select de serviços
     selectServico.innerHTML = '<option value="">Escolha o serviço</option>';
     
-    servicos.forEach(servico => {
+    // Extrai barbeiros únicos dos serviços
+    const barbeirosMap = new Map();
+    
+    servicosCarregados.forEach(servico => {
       const opcao = document.createElement('option');
       opcao.value = servico.id;
       opcao.textContent = `${servico.nome} - R$ ${Number(servico.preco).toFixed(2)}`;
       opcao.dataset.barbeiroId = servico.barbeiroId;
       selectServico.appendChild(opcao);
+      
+      // Adiciona barbeiro ao Map (evita duplicatas)
+      if (servico.barbeiroId && servico.barbeiro) {
+        barbeirosMap.set(servico.barbeiroId, servico.barbeiro);
+      }
     });
     
-    const respostaUsuarios = await fetch(`${API_URL}/api/usuarios`, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
+    // Popula select de barbeiros com os dados dos serviços
+    selectBarbeiro.innerHTML = '<option value="">Selecione o barbeiro</option>';
     
-    if (!respostaUsuarios.ok) {
-      throw new Error('Erro ao carregar barbeiros');
-    }
-    
-    const dadosUsuarios = await respostaUsuarios.json();
-    const usuarios = dadosUsuarios.data || [];
-    const barbeiros = usuarios.filter(u => u.tipo === 'BARBEIRO');
-    
-    console.log('💈 Barbeiros disponíveis:', barbeiros.length);
-    
-    selectBarbeiro.innerHTML = '<option value="">Escolha o barbeiro</option>';
-    
-    barbeiros.forEach(barbeiro => {
+    barbeirosMap.forEach((barbeiro, id) => {
       const opcao = document.createElement('option');
-      opcao.value = barbeiro.id;
-      opcao.textContent = barbeiro.nome;
+      opcao.value = id;
+      opcao.textContent = barbeiro.nome || 'Barbeiro';
       selectBarbeiro.appendChild(opcao);
     });
     
-    // Quando escolhe serviço, seleciona automaticamente o barbeiro
+    console.log('💈 Barbeiros encontrados:', barbeirosMap.size);
+    
+    // Auto-seleciona barbeiro quando escolhe serviço
     selectServico.addEventListener('change', (e) => {
       const opcaoSelecionada = e.target.options[e.target.selectedIndex];
       const barbeiroId = opcaoSelecionada.dataset.barbeiroId;
       
       console.log('🎯 Serviço selecionado:', {
+        servicoNome: opcaoSelecionada.textContent,
         servicoId: opcaoSelecionada.value,
         barbeiroId: barbeiroId
       });
       
       if (barbeiroId) {
         selectBarbeiro.value = barbeiroId;
+        console.log('✅ Barbeiro auto-selecionado');
       }
     });
+    
+    console.log('✅ Serviços e barbeiros carregados com sucesso!');
     
   } catch (erro) {
     console.error('❌ Erro ao carregar serviços:', erro);
@@ -537,7 +524,6 @@ async function carregarServicosDisponiveis() {
   }
 }
 
-// barbeiros
 function mostrarNossosBarbeiros() {
   const container = document.getElementById('barbers-grid');
   if (!container) return;
@@ -582,7 +568,6 @@ function mostrarMensagem(texto, tipo) {
   }, 5000);
 }
 
-// deixa o HTML chamar essas funções
 window.createAppointment = criarNovoAgendamento;
 window.deleteAppointment = cancelarAgendamento;
 window.logout = sair;
