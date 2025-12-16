@@ -1,5 +1,3 @@
-// frontend/js/forgot-password.js
-
 const API_URL = 'https://barbertime-api.onrender.com';
 
 document.addEventListener('DOMContentLoaded', () => {
