@@ -27,6 +27,8 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   async function login() {
+    alert('Função login foi chamada!');
+    
     const email = emailInput.value.trim();
     const senha = passwordInput.value.trim();
 
@@ -46,7 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loginBtn.textContent = 'Entrando...';
 
     try {
-      const response = await fetch(`${API_URL}/api/auth/login`, {
+      const response = await fetch(`${API_URL}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, senha })
