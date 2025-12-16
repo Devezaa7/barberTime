@@ -1,3 +1,5 @@
+const API_URL = 'https://barbertime-api.onrender.com';
+
 const registerBtn = document.getElementById("register-btn");
 const errorMsg = document.getElementById("error-msg");
 
@@ -5,9 +7,10 @@ registerBtn.addEventListener("click", async (e) => {
   e.preventDefault();
 
   // Inputs
-  const name = document.getElementById("name").value.trim();
+  const nome = document.getElementById("name").value.trim();
   const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value;
+  const telefone = document.getElementById("phone")?.value.trim() || ""; // Se tiver campo telefone
+  const senha = document.getElementById("password").value;
   const confirmPassword = document.getElementById("confirmPassword").value;
 
   // Limpa mensagens
@@ -15,33 +18,34 @@ registerBtn.addEventListener("click", async (e) => {
   errorMsg.classList.remove("success");
 
   // Validações básicas
-  if (!name || !email || !password || !confirmPassword) {
+  if (!nome || !email || !senha || !confirmPassword) {
     errorMsg.textContent = "Preencha todos os campos.";
     return;
   }
 
-  if (password.length < 6) {
+  if (senha.length < 6) {
     errorMsg.textContent = "A senha deve ter no mínimo 6 caracteres.";
     return;
   }
 
-  if (password !== confirmPassword) {
+  if (senha !== confirmPassword) {
     errorMsg.textContent = "As senhas não coincidem.";
     return;
   }
 
-  // Dados para API
+  // Dados para API (com os nomes corretos que o backend espera)
   const payload = {
-    name,
+    nome,
     email,
-    password
+    telefone,
+    senha
   };
 
   try {
     registerBtn.disabled = true;
     registerBtn.textContent = "CRIANDO CONTA...";
 
-    const response = await fetch("https://barbertime-api.onrender.com/register", {
+    const response = await fetch(`${API_URL}/api/auth/register`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -52,7 +56,7 @@ registerBtn.addEventListener("click", async (e) => {
     const data = await response.json();
 
     if (!response.ok) {
-      errorMsg.textContent = data.message || "Erro ao criar conta.";
+      errorMsg.textContent = data.error || data.message || "Erro ao criar conta.";
       return;
     }
 
@@ -61,7 +65,7 @@ registerBtn.addEventListener("click", async (e) => {
     errorMsg.classList.add("success");
 
     setTimeout(() => {
-      window.location.href = "login.html";
+      window.location.href = "index.html";
     }, 2000);
 
   } catch (error) {
