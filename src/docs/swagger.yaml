@@ -1,223 +1,1038 @@
-openapi: 3.0.0
+openapi: 3.0.3
 info:
   title: BarberTime API
-  description: API de autenticação e gerenciamento de usuários do BarberTime
+  description: |
+    💈 **Sistema completo de agendamento para barbearias modernas**
+    
+    O BarberTime é uma solução completa para gestão de barbearias, permitindo:
+    - Agendamentos online 24/7
+    - Controle de serviços e preços
+    - Gestão de barbeiros e clientes
+    - Histórico detalhado de atendimentos
+    
+    ## Autenticação
+    
+    A maioria das rotas requer autenticação via JWT. Para obter um token:
+    1. Faça login através do endpoint `/api/auth/login`
+    2. Use o token retornado no header `Authorization: Bearer {token}`
+    
+    ## Tipos de Usuário
+    
+    - **ADMIN**: Acesso total ao sistema
+    - **BARBEIRO**: Visualiza e gerencia seus agendamentos
+    - **CLIENTE**: Cria e gerencia seus próprios agendamentos
+    
+    ## Contato
+    - 📧 Email: contato@barbertime.com
+    - 📱 Telefone: +55 31 7184-0575
   version: 1.0.0
+  contact:
+    name: Squad One - BarberTime
+    email: contato@barbertime.com
+  license:
+    name: ISC
+    url: https://opensource.org/licenses/ISC
 
 servers:
-  - url: http://localhost:3000
-    description: Ambiente local
+  - url: http://localhost:3000/api
+    description: Servidor de Desenvolvimento
+  - url: https://api.barbertime.com/api
+    description: Servidor de Produção
 
 tags:
-  - name: Auth
-    description: Autenticação
+  - name: Autenticação
+    description: Endpoints de autenticação e gerenciamento de sessão
   - name: Usuários
-    description: Gerenciamento de usuários
-
-paths:
-
-  /auth/login:
-    post:
-      tags: [Auth]
-      summary: Login do usuário
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/LoginRequest"
-      responses:
-        200:
-          description: Login realizado com sucesso
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/LoginResponse"
-        401:
-          description: Credenciais inválidas
-
-  /auth/register:
-    post:
-      tags: [Auth]
-      summary: Registro de usuário
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/RegisterRequest"
-      responses:
-        201:
-          description: Usuário registrado com sucesso
-        400:
-          description: Erro de validação
-
-  /auth/me:
-    get:
-      tags: [Auth]
-      summary: Retorna dados do usuário logado
-      security:
-        - bearerAuth: []
-      responses:
-        200:
-          description: Usuário autenticado
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/User"
-
-  /usuarios:
-    post:
-      tags: [Usuários]
-      summary: Criar usuário (ADMIN)
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/RegisterRequest"
-      responses:
-        201:
-          description: Usuário criado com sucesso
-
-    get:
-      tags: [Usuários]
-      summary: Listar usuários (ADMIN)
-      security:
-        - bearerAuth: []
-      parameters:
-        - in: query
-          name: page
-          schema:
-            type: integer
-            example: 1
-        - in: query
-          name: perPage
-          schema:
-            type: integer
-            example: 10
-      responses:
-        200:
-          description: Lista paginada de usuários
-
-  /usuarios/{id}:
-    get:
-      tags: [Usuários]
-      summary: Buscar usuário por ID
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        200:
-          description: Usuário encontrado
-
-    put:
-      tags: [Usuários]
-      summary: Atualizar usuário
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/UpdateUserRequest"
-      responses:
-        200:
-          description: Usuário atualizado
-
-    delete:
-      tags: [Usuários]
-      summary: Deletar usuário (ADMIN)
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        200:
-          description: Usuário deletado
+    description: Gerenciamento de usuários (clientes, barbeiros e admins)
+  - name: Serviços
+    description: Catálogo de serviços da barbearia
+  - name: Agendamentos
+    description: Sistema de agendamentos e reservas
 
 components:
   securitySchemes:
-    bearerAuth:
+    BearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
+      description: Token JWT obtido através do login
 
   schemas:
+    # === SCHEMAS DE USUÁRIO ===
+    Usuario:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        nome:
+          type: string
+          example: "João Silva"
+        email:
+          type: string
+          format: email
+          example: "joao@email.com"
+        telefone:
+          type: string
+          example: "11999999999"
+        tipo:
+          type: string
+          enum: [ADMIN, BARBEIRO, CLIENTE]
+          example: "CLIENTE"
+        ativo:
+          type: boolean
+          example: true
+        criadoEm:
+          type: string
+          format: date-time
+          example: "2025-12-16T10:00:00.000Z"
+        atualizadoEm:
+          type: string
+          format: date-time
+          example: "2025-12-16T10:00:00.000Z"
 
+    UsuarioComAgendamentos:
+      allOf:
+        - $ref: '#/components/schemas/Usuario'
+        - type: object
+          properties:
+            agendamentos:
+              type: array
+              items:
+                $ref: '#/components/schemas/Agendamento'
+            servicosCriados:
+              type: array
+              items:
+                $ref: '#/components/schemas/Servico'
+
+    # === SCHEMAS DE SERVIÇO ===
+    Servico:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "660e8400-e29b-41d4-a716-446655440001"
+        nome:
+          type: string
+          example: "Corte Degradê"
+        descricao:
+          type: string
+          example: "Corte moderno com degradê profissional"
+        preco:
+          type: number
+          format: float
+          example: 45.00
+        duracao:
+          type: integer
+          description: Duração em minutos
+          example: 40
+        barbeiroId:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        barbeiro:
+          $ref: '#/components/schemas/Usuario'
+        ativo:
+          type: boolean
+          example: true
+        criadoEm:
+          type: string
+          format: date-time
+        atualizadoEm:
+          type: string
+          format: date-time
+
+    # === SCHEMAS DE AGENDAMENTO ===
+    Agendamento:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "770e8400-e29b-41d4-a716-446655440002"
+        dataHora:
+          type: string
+          format: date-time
+          example: "2025-12-20T10:00:00.000Z"
+        status:
+          type: string
+          enum: [PENDENTE, CONFIRMADO, CANCELADO, CONCLUIDO]
+          example: "PENDENTE"
+        observacao:
+          type: string
+          nullable: true
+          example: "Primeira vez na barbearia"
+        clienteId:
+          type: string
+          format: uuid
+        cliente:
+          $ref: '#/components/schemas/Usuario'
+        barbeiroId:
+          type: string
+          format: uuid
+        barbeiro:
+          $ref: '#/components/schemas/Usuario'
+        servicoId:
+          type: string
+          format: uuid
+        servico:
+          $ref: '#/components/schemas/Servico'
+        criadoEm:
+          type: string
+          format: date-time
+        atualizadoEm:
+          type: string
+          format: date-time
+
+    # === SCHEMAS DE REQUEST ===
     LoginRequest:
       type: object
-      required: [email, password]
+      required:
+        - email
+        - senha
       properties:
         email:
           type: string
-          example: admin@barbertime.com
-        password:
+          format: email
+          example: "admin@barbertime.com"
+        senha:
           type: string
-          example: "123456"
+          format: password
+          example: "senha123"
 
+    RegisterRequest:
+      type: object
+      required:
+        - nome
+        - email
+        - telefone
+        - senha
+        - tipo
+      properties:
+        nome:
+          type: string
+          minLength: 3
+          example: "João Silva"
+        email:
+          type: string
+          format: email
+          example: "joao@email.com"
+        telefone:
+          type: string
+          pattern: '^\d{10,11}$'
+          example: "11999999999"
+        senha:
+          type: string
+          format: password
+          minLength: 6
+          example: "senha123"
+        tipo:
+          type: string
+          enum: [ADMIN, BARBEIRO, CLIENTE]
+          example: "CLIENTE"
+
+    CreateUsuarioRequest:
+      type: object
+      required:
+        - nome
+        - email
+        - telefone
+        - senha
+        - tipo
+      properties:
+        nome:
+          type: string
+          example: "Maria Santos"
+        email:
+          type: string
+          format: email
+          example: "maria@email.com"
+        telefone:
+          type: string
+          example: "11988888888"
+        senha:
+          type: string
+          format: password
+          example: "senha123"
+        tipo:
+          type: string
+          enum: [ADMIN, BARBEIRO, CLIENTE]
+          example: "BARBEIRO"
+
+    UpdateUsuarioRequest:
+      type: object
+      properties:
+        nome:
+          type: string
+          example: "João da Silva Santos"
+        telefone:
+          type: string
+          example: "11988888888"
+        senha:
+          type: string
+          format: password
+          example: "novaSenha123"
+
+    CreateServicoRequest:
+      type: object
+      required:
+        - nome
+        - preco
+        - duracao
+        - barbeiroId
+      properties:
+        nome:
+          type: string
+          example: "Corte Degradê"
+        descricao:
+          type: string
+          example: "Corte moderno com degradê profissional"
+        preco:
+          type: number
+          format: float
+          minimum: 0
+          example: 45.00
+        duracao:
+          type: integer
+          minimum: 15
+          example: 40
+        barbeiroId:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440000"
+
+    UpdateServicoRequest:
+      type: object
+      properties:
+        nome:
+          type: string
+          example: "Corte Degradê Premium"
+        descricao:
+          type: string
+          example: "Corte moderno com degradê profissional e finalização"
+        preco:
+          type: number
+          format: float
+          example: 50.00
+        duracao:
+          type: integer
+          example: 45
+
+    CreateAgendamentoRequest:
+      type: object
+      required:
+        - dataHora
+        - servicoId
+        - barbeiroId
+      properties:
+        dataHora:
+          type: string
+          format: date-time
+          example: "2025-12-20T10:00:00.000Z"
+        servicoId:
+          type: string
+          format: uuid
+          example: "660e8400-e29b-41d4-a716-446655440001"
+        barbeiroId:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        observacao:
+          type: string
+          example: "Primeira vez na barbearia"
+
+    UpdateAgendamentoRequest:
+      type: object
+      properties:
+        dataHora:
+          type: string
+          format: date-time
+          example: "2025-12-20T14:00:00.000Z"
+        status:
+          type: string
+          enum: [PENDENTE, CONFIRMADO, CANCELADO, CONCLUIDO]
+          example: "CONFIRMADO"
+        observacao:
+          type: string
+          example: "Cliente confirmou presença"
+
+    # === SCHEMAS DE RESPONSE ===
     LoginResponse:
       type: object
       properties:
         token:
           type: string
-          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-        user:
-          $ref: "#/components/schemas/User"
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        usuario:
+          $ref: '#/components/schemas/Usuario'
 
-    RegisterRequest:
-      type: object
-      required: [name, email, password]
-      properties:
-        name:
-          type: string
-          example: Samuel Sales
-        email:
-          type: string
-          example: samuel@email.com
-        password:
-          type: string
-          example: "123456"
-
-    UpdateUserRequest:
+    PaginatedUsuarios:
       type: object
       properties:
-        name:
-          type: string
-        email:
-          type: string
-
-    User:
-      type: object
-      properties:
-        id:
+        usuarios:
+          type: array
+          items:
+            $ref: '#/components/schemas/Usuario'
+        total:
+          type: integer
+          example: 50
+        page:
           type: integer
           example: 1
-        name:
+        perPage:
+          type: integer
+          example: 10
+        totalPages:
+          type: integer
+          example: 5
+
+    PaginatedServicos:
+      type: object
+      properties:
+        servicos:
+          type: array
+          items:
+            $ref: '#/components/schemas/Servico'
+        total:
+          type: integer
+          example: 20
+        page:
+          type: integer
+          example: 1
+        perPage:
+          type: integer
+          example: 10
+        totalPages:
+          type: integer
+          example: 2
+
+    PaginatedAgendamentos:
+      type: object
+      properties:
+        agendamentos:
+          type: array
+          items:
+            $ref: '#/components/schemas/Agendamento'
+        total:
+          type: integer
+          example: 100
+        page:
+          type: integer
+          example: 1
+        perPage:
+          type: integer
+          example: 10
+        totalPages:
+          type: integer
+          example: 10
+
+    ErrorResponse:
+      type: object
+      properties:
+        erro:
           type: string
-        email:
+          example: "Erro ao processar requisição"
+        detalhes:
           type: string
-        role:
-          type: string
-          example: ADMIN
-        createdAt:
-          type: string
-          format: date-time
+          example: "Detalhes técnicos do erro"
+
+paths:
+  # ==================== AUTENTICAÇÃO ====================
+  /auth/login:
+    post:
+      tags:
+        - Autenticação
+      summary: Login de usuário
+      description: Autentica um usuário e retorna um token JWT
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login realizado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '400':
+          description: Dados inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Credenciais inválidas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/register:
+    post:
+      tags:
+        - Autenticação
+      summary: Registro de novo usuário
+      description: Cria uma nova conta de usuário no sistema
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: Usuário criado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '400':
+          description: Dados inválidos ou email já cadastrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/me:
+    get:
+      tags:
+        - Autenticação
+      summary: Obter usuário autenticado
+      description: Retorna os dados do usuário atualmente autenticado
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Dados do usuário
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Usuario'
+        '401':
+          description: Token inválido ou ausente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # ==================== USUÁRIOS ====================
+  /usuarios:
+    get:
+      tags:
+        - Usuários
+      summary: Listar todos os usuários
+      description: Retorna lista paginada de usuários (requer autenticação)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+          description: Número da página
+        - name: perPage
+          in: query
+          schema:
+            type: integer
+            default: 10
+          description: Itens por página
+        - name: tipo
+          in: query
+          schema:
+            type: string
+            enum: [ADMIN, BARBEIRO, CLIENTE]
+          description: Filtrar por tipo de usuário
+      responses:
+        '200':
+          description: Lista de usuários
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedUsuarios'
+        '401':
+          description: Não autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    post:
+      tags:
+        - Usuários
+      summary: Criar novo usuário
+      description: Cria um novo usuário no sistema (requer permissão de ADMIN)
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUsuarioRequest'
+      responses:
+        '201':
+          description: Usuário criado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Usuario'
+        '400':
+          description: Dados inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Não autenticado
+        '403':
+          description: Sem permissão
+
+  /usuarios/{id}:
+    get:
+      tags:
+        - Usuários
+      summary: Obter usuário por ID
+      description: Retorna os dados de um usuário específico
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID do usuário
+      responses:
+        '200':
+          description: Dados do usuário
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsuarioComAgendamentos'
+        '401':
+          description: Não autenticado
+        '404':
+          description: Usuário não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    put:
+      tags:
+        - Usuários
+      summary: Atualizar usuário
+      description: Atualiza os dados de um usuário existente
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID do usuário
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUsuarioRequest'
+      responses:
+        '200':
+          description: Usuário atualizado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Usuario'
+        '400':
+          description: Dados inválidos
+        '401':
+          description: Não autenticado
+        '403':
+          description: Sem permissão
+        '404':
+          description: Usuário não encontrado
+
+    delete:
+      tags:
+        - Usuários
+      summary: Deletar usuário
+      description: Remove um usuário do sistema (soft delete)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID do usuário
+      responses:
+        '200':
+          description: Usuário deletado com sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  mensagem:
+                    type: string
+                    example: "Usuário deletado com sucesso"
+        '401':
+          description: Não autenticado
+        '403':
+          description: Sem permissão
+        '404':
+          description: Usuário não encontrado
+
+  # ==================== SERVIÇOS ====================
+  /servicos:
+    get:
+      tags:
+        - Serviços
+      summary: Listar todos os serviços
+      description: Retorna lista paginada de serviços disponíveis
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: perPage
+          in: query
+          schema:
+            type: integer
+            default: 10
+        - name: barbeiroId
+          in: query
+          schema:
+            type: string
+            format: uuid
+          description: Filtrar serviços por barbeiro
+      responses:
+        '200':
+          description: Lista de serviços
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedServicos'
+
+    post:
+      tags:
+        - Serviços
+      summary: Criar novo serviço
+      description: Adiciona um novo serviço ao catálogo (requer permissão de ADMIN)
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateServicoRequest'
+      responses:
+        '201':
+          description: Serviço criado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Servico'
+        '400':
+          description: Dados inválidos
+        '401':
+          description: Não autenticado
+        '403':
+          description: Sem permissão
+
+  /servicos/{id}:
+    get:
+      tags:
+        - Serviços
+      summary: Obter serviço por ID
+      description: Retorna os detalhes de um serviço específico
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Dados do serviço
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Servico'
+        '404':
+          description: Serviço não encontrado
+
+    put:
+      tags:
+        - Serviços
+      summary: Atualizar serviço
+      description: Atualiza os dados de um serviço existente (requer permissão de ADMIN)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateServicoRequest'
+      responses:
+        '200':
+          description: Serviço atualizado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Servico'
+        '400':
+          description: Dados inválidos
+        '401':
+          description: Não autenticado
+        '403':
+          description: Sem permissão
+        '404':
+          description: Serviço não encontrado
+
+    delete:
+      tags:
+        - Serviços
+      summary: Deletar serviço
+      description: Remove um serviço do catálogo (soft delete, requer ADMIN)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Serviço deletado com sucesso
+        '401':
+          description: Não autenticado
+        '403':
+          description: Sem permissão
+        '404':
+          description: Serviço não encontrado
+
+  # ==================== AGENDAMENTOS ====================
+  /agendamentos:
+    get:
+      tags:
+        - Agendamentos
+      summary: Listar agendamentos
+      description: |
+        Retorna lista paginada de agendamentos.
+        - CLIENTE: vê apenas seus agendamentos
+        - BARBEIRO: vê apenas agendamentos com ele
+        - ADMIN: vê todos os agendamentos
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: perPage
+          in: query
+          schema:
+            type: integer
+            default: 10
+        - name: clienteId
+          in: query
+          schema:
+            type: string
+            format: uuid
+          description: Filtrar por cliente
+        - name: barbeiroId
+          in: query
+          schema:
+            type: string
+            format: uuid
+          description: Filtrar por barbeiro
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [PENDENTE, CONFIRMADO, CANCELADO, CONCLUIDO]
+          description: Filtrar por status
+        - name: dataInicio
+          in: query
+          schema:
+            type: string
+            format: date
+          description: Filtrar a partir desta data
+        - name: dataFim
+          in: query
+          schema:
+            type: string
+            format: date
+          description: Filtrar até esta data
+      responses:
+        '200':
+          description: Lista de agendamentos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAgendamentos'
+        '401':
+          description: Não autenticado
+
+    post:
+      tags:
+        - Agendamentos
+      summary: Criar novo agendamento
+      description: Cria um novo agendamento na barbearia
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAgendamentoRequest'
+      responses:
+        '201':
+          description: Agendamento criado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Agendamento'
+        '400':
+          description: Dados inválidos ou conflito de horário
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                erro: "Conflito de horário"
+                detalhes: "Já existe um agendamento para este barbeiro neste horário"
+        '401':
+          description: Não autenticado
+
+  /agendamentos/{id}:
+    get:
+      tags:
+        - Agendamentos
+      summary: Obter agendamento por ID
+      description: Retorna os detalhes de um agendamento específico
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Dados do agendamento
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Agendamento'
+        '401':
+          description: Não autenticado
+        '403':
+          description: Sem permissão para visualizar este agendamento
+        '404':
+          description: Agendamento não encontrado
+
+    put:
+      tags:
+        - Agendamentos
+      summary: Atualizar agendamento
+      description: |
+        Atualiza os dados de um agendamento.
+        - CLIENTE: pode atualizar seus agendamentos (exceto status)
+        - BARBEIRO: pode atualizar status de seus agendamentos
+        - ADMIN: pode atualizar qualquer coisa
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateAgendamentoRequest'
+      responses:
+        '200':
+          description: Agendamento atualizado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Agendamento'
+        '400':
+          description: Dados inválidos ou conflito de horário
+        '401':
+          description: Não autenticado
+        '403':
+          description: Sem permissão
+        '404':
+          description: Agendamento não encontrado
+
+    delete:
+      tags:
+        - Agendamentos
+      summary: Cancelar agendamento
+      description: |
+        Cancela um agendamento (soft delete).
+        - CLIENTE: pode cancelar seus próprios agendamentos
+        - ADMIN: pode cancelar qualquer agendamento
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Agendamento cancelado com sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  mensagem:
+                    type: string
+                    example: "Agendamento cancelado com sucesso"
+        '401':
+          description: Não autenticado
+        '403':
+          description: Sem permissão
+        '404':
+          description: Agendamento não encontrado
