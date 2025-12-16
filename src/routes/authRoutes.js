@@ -4,13 +4,13 @@ import { authenticate } from '../middlewares/authMiddleware.js';
 
 const router = Router();
 
-// Rota de login (pública)
+// Rotas públicas
 router.post('/login', AuthController.login);
-
-// Rota de registro (pública)
 router.post('/register', AuthController.register);
+router.post('/forgot-password', AuthController.forgotPassword);
+router.post('/reset-password', AuthController.resetPassword);
 
-// Rota para pegar dados do usuário logado (protegida)
+// Rota protegida
 router.get('/me', authenticate, AuthController.me);
 
 export default router;
