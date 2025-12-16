@@ -1,30 +1,6 @@
 openapi: 3.0.3
 info:
   title: BarberTime API
-  description: |
-    💈 **Sistema completo de agendamento para barbearias modernas**
-    
-    O BarberTime é uma solução completa para gestão de barbearias, permitindo:
-    - Agendamentos online 24/7
-    - Controle de serviços e preços
-    - Gestão de barbeiros e clientes
-    - Histórico detalhado de atendimentos
-    
-    ## Autenticação
-    
-    A maioria das rotas requer autenticação via JWT. Para obter um token:
-    1. Faça login através do endpoint `/api/auth/login`
-    2. Use o token retornado no header `Authorization: Bearer {token}`
-    
-    ## Tipos de Usuário
-    
-    - **ADMIN**: Acesso total ao sistema
-    - **BARBEIRO**: Visualiza e gerencia seus agendamentos
-    - **CLIENTE**: Cria e gerencia seus próprios agendamentos
-    
-    ## Contato
-    - 📧 Email: contato@barbertime.com
-    - 📱 Telefone: +55 31 7184-0575
   version: 1.0.0
   contact:
     name: Squad One - BarberTime
