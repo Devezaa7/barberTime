@@ -41,7 +41,7 @@ registerBtn.addEventListener("click", async (e) => {
     registerBtn.disabled = true;
     registerBtn.textContent = "CRIANDO CONTA...";
 
-    const response = await fetch("http://localhost:3000/register", {
+    const response = await fetch("https://barbertime-api.onrender.com/register", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
