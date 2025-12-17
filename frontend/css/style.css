@@ -36,7 +36,7 @@ h1, h2, h3 {
 }
 
 /* ===================================
-   PÁGINA DE LOGIN - LUXO TOTAL
+   PÁGINA DE LOGIN - 
    =================================== */
 
 body:not(.dark-bg) {
@@ -267,7 +267,7 @@ input::placeholder {
 }
 
 /* ===================================
-   PÁGINAS INTERNAS - LUXO PREMIUM
+   PÁGINAS INTERNAS  
    =================================== */
 
 .dark-bg {
@@ -766,7 +766,7 @@ body {
 
 /* ===================================
    BARBERTIME - RECUPERAÇÃO DE SENHA
-   Design Premium & Luxuoso
+   Design 
    =================================== */
 
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;900&family=Montserrat:wght@300;400;500;600;700&display=swap');
